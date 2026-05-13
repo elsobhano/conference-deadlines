@@ -48,12 +48,6 @@
     return d && !isNaN(d) ? shortDateFormatter.format(d) : "TBA";
   }
 
-  function daysUntil(date) {
-    const now = new Date();
-    const ms = date.getTime() - now.getTime();
-    return Math.ceil(ms / (1000 * 60 * 60 * 24));
-  }
-
   function isPassed(value) {
     const d = parseDate(value);
     return d && !isNaN(d) && d.getTime() < Date.now();
@@ -80,7 +74,7 @@
   }
 
   function badgeFor(active) {
-    if (!active) return null;
+    if (!active) return { label: "Deadlines TBA", cls: "tba" };
     const action = active.kind === "registration" ? "Register" : "Submit";
     const noun = active.kind === "registration" ? "Registration" : "Submission";
     const diffMs = active.date.getTime() - Date.now();
@@ -119,15 +113,22 @@
     const dateKey =
       mode === "registration" ? "registrationDeadline" : "submissionDeadline";
 
-    // Upcoming first (soonest → latest), then passed (most recent → oldest).
+    // Upcoming first (soonest → latest), then passed (most recent → oldest),
+    // then TBA / missing dates last.
     copy.sort((a, b) => {
-      const da = new Date(a[dateKey]).getTime();
-      const db = new Date(b[dateKey]).getTime();
-      const aPassed = da < now;
-      const bPassed = db < now;
+      const da = a[dateKey] ? new Date(a[dateKey]) : null;
+      const db = b[dateKey] ? new Date(b[dateKey]) : null;
+      const aValid = da && !isNaN(da);
+      const bValid = db && !isNaN(db);
+      if (aValid !== bValid) return aValid ? -1 : 1;
+      if (!aValid) return 0;
+      const ta = da.getTime();
+      const tb = db.getTime();
+      const aPassed = ta < now;
+      const bPassed = tb < now;
       if (aPassed !== bPassed) return aPassed ? 1 : -1;
-      if (aPassed) return db - da;
-      return da - db;
+      if (aPassed) return tb - ta;
+      return ta - tb;
     });
     return copy;
   }
@@ -287,16 +288,21 @@
     }
 
     const active = getActiveDeadline(conf);
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
     if (active) {
+      countdownEl.hidden = false;
       updateCountdown(active.date, active.kind, conf.timezone);
-      if (countdownTimer) clearInterval(countdownTimer);
       countdownTimer = setInterval(
         () => updateCountdown(active.date, active.kind, conf.timezone),
         1000
       );
-      countdownEl.parentElement
-        .querySelector("#countdown")
-        .removeAttribute("hidden");
+    } else {
+      countdownEl.hidden = true;
+      countdownEl.classList.remove("passed");
+      countdownTargetEl.textContent = "Deadlines have not been announced yet.";
     }
 
     modal.hidden = false;

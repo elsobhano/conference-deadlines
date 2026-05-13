@@ -97,11 +97,11 @@ window.CONFERENCES = [
   {
     name: "AAAI 2027",
     fullName: "AAAI Conference on Artificial Intelligence",
-    location: "Washington D.C., USA",
-    registrationDeadline: "2026-07-25T23:59:00-12:00",
-    submissionDeadline: "2026-08-01T23:59:00-12:00",
+    location: "Montréal, Canada",
+    registrationDeadline: null,
+    submissionDeadline: null,
     timezone: "AoE",
-    conferenceDates: "Feb 4 – Feb 11, 2027",
+    conferenceDates: "Feb 16 – Feb 19, 2027",
     website: "https://aaai.org/conference/aaai/",
   },
   {

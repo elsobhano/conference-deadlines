@@ -242,6 +242,13 @@ main {
   color: var(--muted);
 }
 
+.badge.tba {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  padding: 0.15rem 0.5rem;
+}
+
 .empty-state {
   text-align: center;
   color: var(--muted);
