@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conference Deadlines</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Conference Deadlines</h1>
+    <p class="tagline">Upcoming paper submission &amp; registration dates</p>
+    <div class="controls">
+      <input
+        type="search"
+        id="search"
+        placeholder="Search by name or location..."
+        aria-label="Search conferences"
+      />
+      <select id="sort" aria-label="Sort conferences">
+        <option value="submission">Sort by submission deadline</option>
+        <option value="registration">Sort by registration deadline</option>
+        <option value="name">Sort by name</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <section id="conference-list" class="grid" aria-live="polite"></section>
+    <p id="empty-state" class="empty-state" hidden>No conferences match your search.</p>
+  </main>
+
+  <div
+    id="modal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    hidden
+  >
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      <h2 id="modal-title"></h2>
+      <p class="modal-location" id="modal-location"></p>
+
+      <div class="countdown" id="countdown">
+        <div class="countdown-block">
+          <span class="countdown-value" id="cd-days">0</span>
+          <span class="countdown-label">Days</span>
+        </div>
+        <div class="countdown-block">
+          <span class="countdown-value" id="cd-hours">0</span>
+          <span class="countdown-label">Hours</span>
+        </div>
+        <div class="countdown-block">
+          <span class="countdown-value" id="cd-minutes">0</span>
+          <span class="countdown-label">Minutes</span>
+        </div>
+        <div class="countdown-block">
+          <span class="countdown-value" id="cd-seconds">0</span>
+          <span class="countdown-label">Seconds</span>
+        </div>
+      </div>
+      <p class="countdown-target" id="countdown-target"></p>
+
+      <dl class="modal-details">
+        <dt>Registration deadline</dt>
+        <dd id="modal-registration"></dd>
+        <dt>Submission deadline</dt>
+        <dd id="modal-submission"></dd>
+        <dt>Conference dates</dt>
+        <dd id="modal-dates"></dd>
+        <dt>Website</dt>
+        <dd><a id="modal-website" href="#" target="_blank" rel="noopener"></a></dd>
+      </dl>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>Edit <code>conferences.js</code> to add or update conferences.</p>
+  </footer>
+
+  <script src="conferences.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
