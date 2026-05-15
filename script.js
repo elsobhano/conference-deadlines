@@ -27,10 +27,12 @@
   let badgeTickerStarted = false;
 
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
     dateStyle: "long",
     timeStyle: "short",
   });
   const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -40,14 +42,31 @@
     return value ? new Date(value) : null;
   }
 
+  // Returns a Date whose UTC fields equal the wall-clock fields of the
+  // ISO string, ignoring the offset. Used for display so the "named date"
+  // (e.g. May 22 AoE) is preserved regardless of the viewer's timezone.
+  function wallClockDate(value) {
+    if (!value) return null;
+    const m = String(value).match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
+    );
+    if (!m) {
+      const d = new Date(value);
+      return isNaN(d) ? null : d;
+    }
+    return new Date(
+      Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0))
+    );
+  }
+
   function formatDate(value) {
-    const d = parseDate(value);
-    return d && !isNaN(d) ? dateFormatter.format(d) : "TBA";
+    const d = wallClockDate(value);
+    return d ? dateFormatter.format(d) : "TBA";
   }
 
   function formatShortDate(value) {
-    const d = parseDate(value);
-    return d && !isNaN(d) ? shortDateFormatter.format(d) : "TBA";
+    const d = wallClockDate(value);
+    return d ? shortDateFormatter.format(d) : "TBA";
   }
 
   function isPassed(value) {
