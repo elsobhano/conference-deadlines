@@ -16,7 +16,31 @@
   const modalWarning = document.getElementById("modal-warning");
   const modalWarningText = document.getElementById("modal-warning-text");
   const modalStats = document.getElementById("modal-stats");
-  const modalStatsBody = document.getElementById("modal-stats-body");
+  const compareModal = document.getElementById("compare-modal");
+  const compareBtn = document.getElementById("compare-btn");
+  const compareClose = document.getElementById("compare-close");
+
+  let chartRate = null;
+  let chartSubs = null;
+  let compareChartRate = null;
+  let compareChartSubs = null;
+
+  const CHART_COLORS = [
+    "#38bdf8",
+    "#a78bfa",
+    "#4ade80",
+    "#fbbf24",
+    "#f87171",
+    "#ec4899",
+    "#10b981",
+    "#f97316",
+    "#06b6d4",
+    "#eab308",
+    "#8b5cf6",
+    "#22d3ee",
+    "#f43f5e",
+    "#84cc16",
+  ];
   const countdownEl = document.getElementById("countdown");
   const countdownTargetEl = document.getElementById("countdown-target");
   const cdDays = document.getElementById("cd-days");
@@ -337,6 +361,180 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
+  function chartOptions({ yLabel, showLegend = false } = {}) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          display: showLegend,
+          position: "bottom",
+          labels: {
+            color: "#e2e8f0",
+            boxWidth: 12,
+            font: { size: 11 },
+            padding: 8,
+          },
+        },
+        tooltip: { mode: "index", intersect: false },
+      },
+      scales: {
+        x: {
+          ticks: { color: "#94a3b8" },
+          grid: { color: "rgba(148, 163, 184, 0.1)" },
+        },
+        y: {
+          beginAtZero: true,
+          title: yLabel
+            ? { display: true, text: yLabel, color: "#94a3b8" }
+            : undefined,
+          ticks: { color: "#94a3b8" },
+          grid: { color: "rgba(148, 163, 184, 0.1)" },
+        },
+      },
+    };
+  }
+
+  function renderModalCharts(conf) {
+    if (chartRate) {
+      chartRate.destroy();
+      chartRate = null;
+    }
+    if (chartSubs) {
+      chartSubs.destroy();
+      chartSubs = null;
+    }
+    const stats = Array.isArray(conf.stats) ? conf.stats.slice() : [];
+    if (stats.length === 0 || typeof Chart === "undefined") {
+      modalStats.hidden = true;
+      return;
+    }
+    modalStats.hidden = false;
+    stats.sort((a, b) => (a.year || 0) - (b.year || 0));
+    const labels = stats.map((s) => s.year);
+    const rates = stats.map((s) => (s.acceptanceRate != null ? s.acceptanceRate : null));
+    const subs = stats.map((s) => (s.submissions != null ? s.submissions : null));
+
+    chartRate = new Chart(document.getElementById("modal-chart-rate"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Acceptance %",
+            data: rates,
+            borderColor: "#a78bfa",
+            backgroundColor: "rgba(167, 139, 250, 0.18)",
+            fill: true,
+            tension: 0.25,
+            spanGaps: true,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+          },
+        ],
+      },
+      options: chartOptions({ yLabel: "%" }),
+    });
+
+    chartSubs = new Chart(document.getElementById("modal-chart-subs"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Submissions",
+            data: subs,
+            borderColor: "#38bdf8",
+            backgroundColor: "rgba(56, 189, 248, 0.18)",
+            fill: true,
+            tension: 0.25,
+            spanGaps: true,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+          },
+        ],
+      },
+      options: chartOptions(),
+    });
+  }
+
+  function renderCompareCharts() {
+    if (compareChartRate) {
+      compareChartRate.destroy();
+      compareChartRate = null;
+    }
+    if (compareChartSubs) {
+      compareChartSubs.destroy();
+      compareChartSubs = null;
+    }
+    if (typeof Chart === "undefined") return;
+
+    const confs = (window.CONFERENCES || []).filter(
+      (c) => Array.isArray(c.stats) && c.stats.length > 0
+    );
+    if (confs.length === 0) return;
+
+    const yearSet = new Set();
+    confs.forEach((c) => c.stats.forEach((s) => yearSet.add(s.year)));
+    const labels = Array.from(yearSet)
+      .filter((y) => typeof y === "number")
+      .sort((a, b) => a - b);
+
+    const makeDatasets = (key) =>
+      confs.map((c, i) => ({
+        label: c.name,
+        data: labels.map((y) => {
+          const stat = c.stats.find((s) => s.year === y);
+          return stat && stat[key] != null ? stat[key] : null;
+        }),
+        borderColor: CHART_COLORS[i % CHART_COLORS.length],
+        backgroundColor: "transparent",
+        spanGaps: true,
+        tension: 0.25,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+      }));
+
+    compareChartRate = new Chart(
+      document.getElementById("compare-chart-rate"),
+      {
+        type: "line",
+        data: { labels, datasets: makeDatasets("acceptanceRate") },
+        options: chartOptions({ yLabel: "%", showLegend: true }),
+      }
+    );
+
+    compareChartSubs = new Chart(
+      document.getElementById("compare-chart-subs"),
+      {
+        type: "line",
+        data: { labels, datasets: makeDatasets("submissions") },
+        options: chartOptions({ showLegend: true }),
+      }
+    );
+  }
+
+  function openCompareModal() {
+    compareModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    renderCompareCharts();
+  }
+
+  function closeCompareModal() {
+    compareModal.hidden = true;
+    document.body.style.overflow = "";
+    if (compareChartRate) {
+      compareChartRate.destroy();
+      compareChartRate = null;
+    }
+    if (compareChartSubs) {
+      compareChartSubs.destroy();
+      compareChartSubs = null;
+    }
+  }
+
   function openModal(conf) {
     const type = conf.type === "workshop" ? "workshop" : "conference";
     const typeLabel = type === "workshop" ? "Workshop" : "Conference";
@@ -369,24 +567,7 @@
     );
     modalDates.textContent = conf.conferenceDates || "TBA";
 
-    const stats = Array.isArray(conf.stats) ? conf.stats.slice() : [];
-    if (stats.length > 0) {
-      stats.sort((a, b) => (b.year || 0) - (a.year || 0));
-      modalStatsBody.innerHTML = stats
-        .map(
-          (s) => `
-        <tr>
-          <td>${s.year ?? "–"}</td>
-          <td>${s.submissions != null ? formatNumber(s.submissions) : "–"}</td>
-          <td>${s.acceptanceRate != null ? s.acceptanceRate + "%" : "–"}</td>
-        </tr>
-      `
-        )
-        .join("");
-      modalStats.hidden = false;
-    } else {
-      modalStats.hidden = true;
-    }
+    renderModalCharts(conf);
 
     if (conf.website) {
       modalWebsite.href = conf.website;
@@ -426,14 +607,29 @@
       clearInterval(countdownTimer);
       countdownTimer = null;
     }
+    if (chartRate) {
+      chartRate.destroy();
+      chartRate = null;
+    }
+    if (chartSubs) {
+      chartSubs.destroy();
+      chartSubs = null;
+    }
   }
 
   modalClose.addEventListener("click", closeModal);
   modal.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
   });
+  compareBtn.addEventListener("click", openCompareModal);
+  compareClose.addEventListener("click", closeCompareModal);
+  compareModal.addEventListener("click", (e) => {
+    if (e.target === compareModal) closeCompareModal();
+  });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.hidden) closeModal();
+    if (e.key !== "Escape") return;
+    if (!compareModal.hidden) closeCompareModal();
+    else if (!modal.hidden) closeModal();
   });
 
   searchEl.addEventListener("input", render);
