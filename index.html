@@ -23,6 +23,11 @@
         <option value="name">Sort by name</option>
       </select>
     </div>
+    <div class="filter-tabs" role="tablist" aria-label="Filter by type">
+      <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+      <button class="filter-tab" data-filter="conference" role="tab" aria-selected="false">Conferences</button>
+      <button class="filter-tab" data-filter="workshop" role="tab" aria-selected="false">Workshops</button>
+    </div>
   </header>
 
   <main>
@@ -69,9 +74,9 @@
       <p class="countdown-target" id="countdown-target"></p>
 
       <dl class="modal-details">
-        <dt>Registration deadline</dt>
+        <dt>Abstract deadline</dt>
         <dd id="modal-registration"></dd>
-        <dt>Submission deadline</dt>
+        <dt>Full paper deadline</dt>
         <dd id="modal-submission"></dd>
         <dt>Conference dates</dt>
         <dd id="modal-dates"></dd>

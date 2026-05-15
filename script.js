@@ -25,45 +25,131 @@
   let countdownTimer = null;
   const liveBadges = [];
   let badgeTickerStarted = false;
+  let activeFilter = "all";
+
+  // Offsets are in minutes east of UTC. Add more labels as needed.
+  const TZ_OFFSETS_MIN = {
+    AOE: -12 * 60,
+    UTC: 0,
+    GMT: 0,
+    WET: 0,
+    WEST: 60,
+    BST: 60,
+    CET: 60,
+    CEST: 120,
+    EET: 120,
+    EEST: 180,
+    MSK: 180,
+    IST: 5.5 * 60,
+    PKT: 5 * 60,
+    SGT: 8 * 60,
+    HKT: 8 * 60,
+    CST: 8 * 60, // China Standard Time
+    JST: 9 * 60,
+    KST: 9 * 60,
+    AEDT: 11 * 60,
+    AEST: 10 * 60,
+    NZDT: 13 * 60,
+    NZST: 12 * 60,
+    EST: -5 * 60,
+    EDT: -4 * 60,
+    CT: -6 * 60,
+    CDT: -5 * 60,
+    MST: -7 * 60,
+    MDT: -6 * 60,
+    PST: -8 * 60,
+    PDT: -7 * 60,
+    AKST: -9 * 60,
+    HST: -10 * 60,
+  };
+
+  function tzOffsetMin(label) {
+    if (!label) return null;
+    const key = String(label).toUpperCase().trim();
+    return key in TZ_OFFSETS_MIN ? TZ_OFFSETS_MIN[key] : null;
+  }
+
+  function parseOffsetStr(str) {
+    if (!str) return null;
+    if (str === "Z") return 0;
+    const m = str.match(/^([+-])(\d{2}):?(\d{2})$/);
+    if (!m) return null;
+    return (m[1] === "+" ? 1 : -1) * (+m[2] * 60 + +m[3]);
+  }
+
+  function parseIsoParts(value) {
+    if (!value) return null;
+    const m = String(value).match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(Z|[+-]\d{2}:?\d{2})?$/
+    );
+    if (!m) return null;
+    return {
+      y: +m[1],
+      mo: +m[2] - 1,
+      d: +m[3],
+      h: +m[4],
+      mi: +m[5],
+      s: +(m[6] || 0),
+      offsetStr: m[7] || null,
+    };
+  }
 
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
     dateStyle: "long",
     timeStyle: "short",
   });
   const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
-  // Parse the wall-clock fields from the ISO string and return a Date in the
-  // viewer's local timezone (ignoring the embedded offset). This keeps the
-  // countdown consistent with the displayed date — "May 22, 23:59" reads as
-  // May 22 in your local time, and the timer ticks down to that moment.
-  function parseDate(value) {
-    if (!value) return null;
-    const m = String(value).match(
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
-    );
-    if (!m) {
+  // Display Date: UTC fields equal the literal wall-clock from the ISO string.
+  // Formatting with `timeZone: "UTC"` renders those numbers verbatim, regardless
+  // of the viewer's local timezone.
+  function wallClockDate(value) {
+    const p = parseIsoParts(value);
+    if (!p) {
+      if (!value) return null;
       const d = new Date(value);
       return isNaN(d) ? null : d;
     }
-    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+    return new Date(Date.UTC(p.y, p.mo, p.d, p.h, p.mi, p.s));
+  }
+
+  // Math Date: the actual instant of the deadline.
+  // Uses the explicit offset in the ISO string if present, otherwise derives
+  // the offset from the conf's `timezone` label. Falls back to local time
+  // if neither is available.
+  function parseDate(value, timezone) {
+    const p = parseIsoParts(value);
+    if (!p) {
+      if (!value) return null;
+      const d = new Date(value);
+      return isNaN(d) ? null : d;
+    }
+    let offsetMin = parseOffsetStr(p.offsetStr);
+    if (offsetMin === null) offsetMin = tzOffsetMin(timezone);
+    if (offsetMin === null) {
+      return new Date(p.y, p.mo, p.d, p.h, p.mi, p.s);
+    }
+    return new Date(Date.UTC(p.y, p.mo, p.d, p.h, p.mi, p.s) - offsetMin * 60000);
   }
 
   function formatDate(value) {
-    const d = parseDate(value);
+    const d = wallClockDate(value);
     return d ? dateFormatter.format(d) : "TBA";
   }
 
   function formatShortDate(value) {
-    const d = parseDate(value);
+    const d = wallClockDate(value);
     return d ? shortDateFormatter.format(d) : "TBA";
   }
 
-  function isPassed(value) {
-    const d = parseDate(value);
+  function isPassed(value, timezone) {
+    const d = parseDate(value, timezone);
     return d && !isNaN(d) && d.getTime() < Date.now();
   }
 
@@ -78,8 +164,8 @@
   // otherwise submission. Returns { date, kind } or null.
   function getActiveDeadline(conf) {
     const now = Date.now();
-    const reg = parseDate(conf.registrationDeadline);
-    const sub = parseDate(conf.submissionDeadline);
+    const reg = parseDate(conf.registrationDeadline, conf.timezone);
+    const sub = parseDate(conf.submissionDeadline, conf.timezone);
     const regValid = reg && !isNaN(reg);
     const subValid = sub && !isNaN(sub);
 
@@ -90,14 +176,16 @@
   }
 
   function kindLabel(kind, short) {
-    if (kind === "registration") return short ? "reg" : "registration";
-    return short ? "sub" : "submission";
+    if (kind === "registration") return short ? "abstract" : "abstract submission";
+    return short ? "full paper" : "full paper submission";
   }
 
   function badgeFor(active) {
     if (!active) return { label: "Deadlines TBA", cls: "tba" };
-    const action = active.kind === "registration" ? "Register" : "Submit";
-    const noun = active.kind === "registration" ? "Registration" : "Submission";
+    const action =
+      active.kind === "registration" ? "Submit Abstract" : "Submit Full Paper";
+    const noun =
+      active.kind === "registration" ? "Abstract" : "Full Paper";
     const diffMs = active.date.getTime() - Date.now();
 
     if (diffMs < 0) return { label: `${noun} passed`, cls: "passed" };
@@ -137,8 +225,8 @@
     // Upcoming first (soonest → latest), then passed (most recent → oldest),
     // then TBA / missing dates last.
     copy.sort((a, b) => {
-      const da = parseDate(a[dateKey]);
-      const db = parseDate(b[dateKey]);
+      const da = parseDate(a[dateKey], a.timezone);
+      const db = parseDate(b[dateKey], b.timezone);
       const aValid = da && !isNaN(da);
       const bValid = db && !isNaN(db);
       if (aValid !== bValid) return aValid ? -1 : 1;
@@ -156,8 +244,14 @@
 
   function filterConferences(list, query) {
     const q = query.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter(
+    let filtered = list;
+    if (activeFilter !== "all") {
+      filtered = filtered.filter(
+        (c) => (c.type || "conference") === activeFilter
+      );
+    }
+    if (!q) return filtered;
+    return filtered.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.fullName && c.fullName.toLowerCase().includes(q)) ||
@@ -176,21 +270,32 @@
     const badge = badgeFor(active);
 
     const tz = conf.timezone ? escapeHTML(conf.timezone) : "local";
-    const regCls = isPassed(conf.registrationDeadline) ? "passed-date" : "";
-    const subCls = isPassed(conf.submissionDeadline) ? "passed-date" : "";
+    const regCls = isPassed(conf.registrationDeadline, conf.timezone) ? "passed-date" : "";
+    const subCls = isPassed(conf.submissionDeadline, conf.timezone) ? "passed-date" : "";
     const estimateBanner = conf.estimated
       ? `<div class="estimate-banner small"><span class="estimate-icon">⚠</span>${escapeHTML(estimateText(conf))}</div>`
       : "";
+    const type = conf.type === "workshop" ? "workshop" : "conference";
+    const typeTag = `<span class="type-pill type-${type}">${type === "workshop" ? "Workshop" : "Conference"}</span>`;
+    const parentLine =
+      type === "workshop" && conf.parentConference
+        ? `<div class="card-parent">@ ${escapeHTML(conf.parentConference)}</div>`
+        : "";
+    card.classList.add(`card-${type}`);
     card.innerHTML = `
-      <h3 class="card-name">${escapeHTML(conf.name)}</h3>
+      <div class="card-header">
+        <h3 class="card-name">${escapeHTML(conf.name)}</h3>
+        ${typeTag}
+      </div>
       <div class="card-location">📍 ${escapeHTML(conf.location)}</div>
+      ${parentLine}
       ${estimateBanner}
       <div class="card-row">
-        <span>Registration</span>
+        <span>Abstract</span>
         <span class="${regCls}">${formatShortDate(conf.registrationDeadline)}</span>
       </div>
       <div class="card-row">
-        <span>Submission</span>
+        <span>Full Paper</span>
         <span class="${subCls}">${formatShortDate(conf.submissionDeadline)}</span>
       </div>
       <div class="card-row">
@@ -288,8 +393,16 @@
   }
 
   function openModal(conf) {
-    modalTitle.textContent = conf.name;
-    modalLocation.textContent = `${conf.fullName ? conf.fullName + " — " : ""}${conf.location}`;
+    const type = conf.type === "workshop" ? "workshop" : "conference";
+    const typeLabel = type === "workshop" ? "Workshop" : "Conference";
+    const parentSuffix =
+      type === "workshop" && conf.parentConference
+        ? ` · @ ${conf.parentConference}`
+        : "";
+    modalTitle.textContent = `${conf.name}`;
+    modalLocation.textContent = `${typeLabel}${parentSuffix} — ${
+      conf.fullName ? conf.fullName + " — " : ""
+    }${conf.location}`;
 
     if (conf.estimated) {
       modalWarningText.textContent = estimateText(conf);
@@ -303,11 +416,11 @@
       formatDate(conf.registrationDeadline) + tzSuffix;
     modalSubmission.classList.toggle(
       "passed-date",
-      isPassed(conf.submissionDeadline)
+      isPassed(conf.submissionDeadline, conf.timezone)
     );
     modalRegistration.classList.toggle(
       "passed-date",
-      isPassed(conf.registrationDeadline)
+      isPassed(conf.registrationDeadline, conf.timezone)
     );
     modalDates.textContent = conf.conferenceDates || "TBA";
 
@@ -361,6 +474,18 @@
 
   searchEl.addEventListener("input", render);
   sortEl.addEventListener("change", render);
+
+  document.querySelectorAll(".filter-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeFilter = btn.dataset.filter;
+      document.querySelectorAll(".filter-tab").forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      render();
+    });
+  });
 
   render();
 })();
