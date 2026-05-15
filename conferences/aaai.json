@@ -9,6 +9,7 @@
   "website": "https://aaai.org/conference/aaai/",
   "type": "conference",
   "stats": [
+    { "year": 2026, "submissions": 23680, "acceptanceRate": 17.6 },
     { "year": 2025, "submissions": 12957, "acceptanceRate": 23.4 },
     { "year": 2024, "submissions": 9862, "acceptanceRate": 23.75 },
     { "year": 2023, "submissions": 8777, "acceptanceRate": 19.6 },

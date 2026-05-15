@@ -9,6 +9,7 @@
   "website": "https://cvpr.thecvf.com/",
   "type": "conference",
   "stats": [
+    { "year": 2026, "submissions": 16092, "acceptanceRate": 25.4 },
     { "year": 2025, "submissions": 13008, "acceptanceRate": 22.1 },
     { "year": 2024, "submissions": 11532, "acceptanceRate": 23.6 },
     { "year": 2023, "submissions": 9155, "acceptanceRate": 25.8 },

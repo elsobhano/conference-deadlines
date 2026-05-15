@@ -9,6 +9,8 @@
   "website": "https://icml.cc/",
   "type": "conference",
   "stats": [
+    { "year": 2026, "submissions": 23918, "acceptanceRate": 26.6 },
+    { "year": 2025, "submissions": 12107, "acceptanceRate": 26.9 },
     { "year": 2024, "submissions": 9473, "acceptanceRate": 27.5 },
     { "year": 2023, "submissions": 6538, "acceptanceRate": 27.9 },
     { "year": 2022, "submissions": 5630, "acceptanceRate": 21.9 },
