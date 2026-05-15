@@ -27,124 +27,41 @@
   let badgeTickerStarted = false;
   let activeFilter = "all";
 
-  // Offsets are in minutes east of UTC. Add more labels as needed.
-  const TZ_OFFSETS_MIN = {
-    AOE: -12 * 60,
-    UTC: 0,
-    GMT: 0,
-    WET: 0,
-    WEST: 60,
-    BST: 60,
-    CET: 60,
-    CEST: 120,
-    EET: 120,
-    EEST: 180,
-    MSK: 180,
-    IST: 5.5 * 60,
-    PKT: 5 * 60,
-    SGT: 8 * 60,
-    HKT: 8 * 60,
-    CST: 8 * 60, // China Standard Time
-    JST: 9 * 60,
-    KST: 9 * 60,
-    AEDT: 11 * 60,
-    AEST: 10 * 60,
-    NZDT: 13 * 60,
-    NZST: 12 * 60,
-    EST: -5 * 60,
-    EDT: -4 * 60,
-    CT: -6 * 60,
-    CDT: -5 * 60,
-    MST: -7 * 60,
-    MDT: -6 * 60,
-    PST: -8 * 60,
-    PDT: -7 * 60,
-    AKST: -9 * 60,
-    HST: -10 * 60,
-  };
-
-  function tzOffsetMin(label) {
-    if (!label) return null;
-    const key = String(label).toUpperCase().trim();
-    return key in TZ_OFFSETS_MIN ? TZ_OFFSETS_MIN[key] : null;
-  }
-
-  function parseOffsetStr(str) {
-    if (!str) return null;
-    if (str === "Z") return 0;
-    const m = str.match(/^([+-])(\d{2}):?(\d{2})$/);
-    if (!m) return null;
-    return (m[1] === "+" ? 1 : -1) * (+m[2] * 60 + +m[3]);
-  }
-
-  function parseIsoParts(value) {
-    if (!value) return null;
-    const m = String(value).match(
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(Z|[+-]\d{2}:?\d{2})?$/
-    );
-    if (!m) return null;
-    return {
-      y: +m[1],
-      mo: +m[2] - 1,
-      d: +m[3],
-      h: +m[4],
-      mi: +m[5],
-      s: +(m[6] || 0),
-      offsetStr: m[7] || null,
-    };
-  }
-
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
-    timeZone: "UTC",
     dateStyle: "long",
     timeStyle: "short",
   });
   const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
-    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
-  // Display Date: UTC fields equal the literal wall-clock from the ISO string.
-  // Formatting with `timeZone: "UTC"` renders those numbers verbatim, regardless
-  // of the viewer's local timezone.
-  function wallClockDate(value) {
-    const p = parseIsoParts(value);
-    if (!p) {
-      if (!value) return null;
+  // Parse the wall-clock fields from the ISO string into a Date in the
+  // viewer's local timezone. Any offset in the string (`+02:00`, `Z`, etc.)
+  // and the conf's `timezone` label are ignored for math — they're treated as
+  // labels only. This keeps the countdown consistent with the displayed date:
+  // "May 22, 23:59" reads as May 22 in your local time, and the timer ticks
+  // down to that exact moment.
+  function parseDate(value, _timezone) {
+    if (!value) return null;
+    const m = String(value).match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
+    );
+    if (!m) {
       const d = new Date(value);
       return isNaN(d) ? null : d;
     }
-    return new Date(Date.UTC(p.y, p.mo, p.d, p.h, p.mi, p.s));
-  }
-
-  // Math Date: the actual instant of the deadline.
-  // Uses the explicit offset in the ISO string if present, otherwise derives
-  // the offset from the conf's `timezone` label. Falls back to local time
-  // if neither is available.
-  function parseDate(value, timezone) {
-    const p = parseIsoParts(value);
-    if (!p) {
-      if (!value) return null;
-      const d = new Date(value);
-      return isNaN(d) ? null : d;
-    }
-    let offsetMin = parseOffsetStr(p.offsetStr);
-    if (offsetMin === null) offsetMin = tzOffsetMin(timezone);
-    if (offsetMin === null) {
-      return new Date(p.y, p.mo, p.d, p.h, p.mi, p.s);
-    }
-    return new Date(Date.UTC(p.y, p.mo, p.d, p.h, p.mi, p.s) - offsetMin * 60000);
+    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
   }
 
   function formatDate(value) {
-    const d = wallClockDate(value);
+    const d = parseDate(value);
     return d ? dateFormatter.format(d) : "TBA";
   }
 
   function formatShortDate(value) {
-    const d = wallClockDate(value);
+    const d = parseDate(value);
     return d ? shortDateFormatter.format(d) : "TBA";
   }
 

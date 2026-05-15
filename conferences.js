@@ -1,7 +1,9 @@
 // Edit this file to add or update conferences and workshops.
-// Dates: write wall-clock time WITHOUT a UTC offset — e.g. "2026-05-21T23:59:00".
-// The `timezone` field is what determines the actual offset (see script.js
-// for the supported labels: AoE, UTC, CET, CEST, EST, EDT, PST, PDT, JST, IST, ...).
+// Dates: write wall-clock time as published — e.g. "2026-05-21T23:59:00".
+// The `timezone` field is a display label (AoE, CEST, UTC, PST, ...). It is
+// shown on the card and in the modal so viewers know which timezone the
+// conference uses, but the countdown ticks down to that wall-clock value in
+// the viewer's local time — so display and countdown always match.
 // `type` is "conference" or "workshop".
 // For workshops, set `parentConference` to the host conference name.
 // `submissionDeadline` is what the countdown targets.
