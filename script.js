@@ -361,22 +361,59 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  function chartOptions({ yLabel, showLegend = false } = {}) {
+  function stripYear(name) {
+    return String(name)
+      .replace(/\s*\(estimated\)/i, "")
+      .replace(/\s+(?:19|20|21)\d{2}\b/g, "")
+      .trim();
+  }
+
+  const legendHoverHandlers = {
+    onHover(_e, item, legend) {
+      const datasets = legend.chart.data.datasets;
+      datasets.forEach((ds, i) => {
+        if (!ds._origColor) ds._origColor = ds.borderColor;
+        if (i === item.datasetIndex) {
+          ds.borderWidth = 4.5;
+          ds.borderColor = ds._origColor;
+          ds.pointRadius = 4;
+        } else {
+          ds.borderWidth = 1;
+          ds.borderColor = ds._origColor + "33";
+          ds.pointRadius = 0;
+        }
+      });
+      legend.chart.update("none");
+    },
+    onLeave(_e, _item, legend) {
+      const datasets = legend.chart.data.datasets;
+      datasets.forEach((ds) => {
+        ds.borderWidth = 2;
+        ds.pointRadius = 2;
+        if (ds._origColor) ds.borderColor = ds._origColor;
+      });
+      legend.chart.update("none");
+    },
+  };
+
+  function chartOptions({ yLabel, showLegend = false, legendHover = false } = {}) {
+    const legend = {
+      display: showLegend,
+      position: "bottom",
+      labels: {
+        color: "#e2e8f0",
+        boxWidth: 12,
+        font: { size: 11 },
+        padding: 8,
+      },
+    };
+    if (legendHover) Object.assign(legend, legendHoverHandlers);
     return {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: {
-          display: showLegend,
-          position: "bottom",
-          labels: {
-            color: "#e2e8f0",
-            boxWidth: 12,
-            font: { size: 11 },
-            padding: 8,
-          },
-        },
+        legend,
         tooltip: { mode: "index", intersect: false },
       },
       scales: {
@@ -483,7 +520,7 @@
 
     const makeDatasets = (key) =>
       confs.map((c, i) => ({
-        label: c.name,
+        label: stripYear(c.name),
         data: labels.map((y) => {
           const stat = c.stats.find((s) => s.year === y);
           return stat && stat[key] != null ? stat[key] : null;
@@ -502,7 +539,7 @@
       {
         type: "line",
         data: { labels, datasets: makeDatasets("acceptanceRate") },
-        options: chartOptions({ yLabel: "%", showLegend: true }),
+        options: chartOptions({ yLabel: "%", showLegend: true, legendHover: true }),
       }
     );
 
@@ -511,7 +548,7 @@
       {
         type: "line",
         data: { labels, datasets: makeDatasets("submissions") },
-        options: chartOptions({ showLegend: true }),
+        options: chartOptions({ showLegend: true, legendHover: true }),
       }
     );
   }
