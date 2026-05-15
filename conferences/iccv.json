@@ -1,0 +1,38 @@
+{
+    "name": "ICCV 2025",
+    "fullName": "International Conference on Computer Vision",
+    "location": "Honolulu, Hawai'i",
+    "registrationDeadline": "2025-03-03T23:59:00",
+    "submissionDeadline": "2025-03-07T23:59:00",
+    "timezone": "AoE",
+    "conferenceDates": "Oct 20 – Oct 24, 2025",
+    "website": "https://iccv.thecvf.com/",
+    "type": "conference",
+    "stats": [
+        {
+          "year": 2025,
+          "submissions": 11239,
+          "acceptanceRate": 24
+        },
+        {
+          "year": 2023,
+          "submissions": 8260,
+          "acceptanceRate": 26.15
+        },
+        {
+          "year": 2021,
+          "submissions": 6152,
+          "acceptanceRate": 26
+        },
+        {
+          "year": 2019,
+          "submissions": 4303,
+          "acceptanceRate": 25
+        },
+        {
+          "year": 2017,
+          "submissions": 2143,
+          "acceptanceRate": 29
+        }
+      ]
+}

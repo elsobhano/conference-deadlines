@@ -8,5 +8,26 @@
   "conferenceDates": "Nov 23 – Nov 26, 2026",
   "website": "https://bmvc2026.bmva.org/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    {
+      "year": 2025,
+      "submissions": 1074,
+      "acceptanceRate": 26
+    },
+    {
+      "year": 2024,
+      "submissions": 1020,
+      "acceptanceRate": 25.9
+    },
+    {
+      "year": 2023,
+      "submissions": 815,
+      "acceptanceRate": 32.8
+    },
+    {
+      "year": 2022,
+      "submissions": 1206,
+      "acceptanceRate": 36
+    }
+  ]
 }

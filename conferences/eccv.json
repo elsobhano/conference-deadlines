@@ -1,0 +1,41 @@
+{
+    "name": "ECCV 2026",
+    "fullName": "European Conference on Computer Vision",
+    "location": "Malmö, Sweden",
+    "registrationDeadline": "2026-02-26T21:59:00",
+    "submissionDeadline": "2026-03-05T21:59:00",
+    "timezone": "UTC",
+    "conferenceDates": "Sep 8 – Sep 12, 2026",
+    "website": "https://eccv.ecva.net/",
+    "type": "conference",
+    "stats": 
+    [
+        {
+          "year": 2026,
+          "submissions": 10665,
+          "acceptanceRate": null
+        },
+        {
+          "year": 2024,
+          "submissions": 8585,
+          "acceptanceRate": 27.9
+        },
+        {
+          "year": 2022,
+          "submissions": 5804,
+          "acceptanceRate": 28.34
+        },
+        {
+          "year": 2020,
+          "submissions": 5150,
+          "acceptanceRate": 26.41
+        },
+        {
+          "year": 2018,
+          "submissions": 2439,
+          "acceptanceRate": 31.82
+        },
+        { "year": 2016, "submissions": 1561, "acceptanceRate": 26.6 },
+        { "year": 2014, "submissions": 1444, "acceptanceRate": 27.9 }
+      ]
+}

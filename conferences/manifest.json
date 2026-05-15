@@ -6,6 +6,8 @@
     "acvr.json",
     "bmvc.json",
     "cvpr.json",
+    "eccv.json",
+    "iccv.json",
     "emnlp.json",
     "iclr.json",
     "icml.json",
