@@ -55,7 +55,7 @@ window.CONFERENCES = [
     website: "https://icml.cc/",
   },
   {
-    name: "ICLR 2027",
+    name: "ICLR 2027 (estimated)",
     fullName: "International Conference on Learning Representations",
     location: "Vienna, Austria",
     registrationDeadline: "2026-09-24T23:59:00-12:00",
@@ -63,6 +63,7 @@ window.CONFERENCES = [
     timezone: "AoE",
     conferenceDates: "Apr 25 – Apr 29, 2027",
     website: "https://iclr.cc/",
+    estimated: true,
   },
   {
     name: "CVPR 2026",
