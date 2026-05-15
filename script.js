@@ -27,25 +27,20 @@
   let badgeTickerStarted = false;
 
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
-    timeZone: "UTC",
     dateStyle: "long",
     timeStyle: "short",
   });
   const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
-    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
+  // Parse the wall-clock fields from the ISO string and return a Date in the
+  // viewer's local timezone (ignoring the embedded offset). This keeps the
+  // countdown consistent with the displayed date — "May 22, 23:59" reads as
+  // May 22 in your local time, and the timer ticks down to that moment.
   function parseDate(value) {
-    return value ? new Date(value) : null;
-  }
-
-  // Returns a Date whose UTC fields equal the wall-clock fields of the
-  // ISO string, ignoring the offset. Used for display so the "named date"
-  // (e.g. May 22 AoE) is preserved regardless of the viewer's timezone.
-  function wallClockDate(value) {
     if (!value) return null;
     const m = String(value).match(
       /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
@@ -54,18 +49,16 @@
       const d = new Date(value);
       return isNaN(d) ? null : d;
     }
-    return new Date(
-      Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0))
-    );
+    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
   }
 
   function formatDate(value) {
-    const d = wallClockDate(value);
+    const d = parseDate(value);
     return d ? dateFormatter.format(d) : "TBA";
   }
 
   function formatShortDate(value) {
-    const d = wallClockDate(value);
+    const d = parseDate(value);
     return d ? shortDateFormatter.format(d) : "TBA";
   }
 
@@ -144,8 +137,8 @@
     // Upcoming first (soonest → latest), then passed (most recent → oldest),
     // then TBA / missing dates last.
     copy.sort((a, b) => {
-      const da = a[dateKey] ? new Date(a[dateKey]) : null;
-      const db = b[dateKey] ? new Date(b[dateKey]) : null;
+      const da = parseDate(a[dateKey]);
+      const db = parseDate(b[dateKey]);
       const aValid = da && !isNaN(da);
       const bValid = db && !isNaN(db);
       if (aValid !== bValid) return aValid ? -1 : 1;
