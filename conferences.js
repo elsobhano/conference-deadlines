@@ -87,9 +87,9 @@ window.CONFERENCES = [
   {
     name: "EMNLP 2026",
     fullName: "Empirical Methods in Natural Language Processing",
-    location: "Abu Dhabi, UAE",
-    registrationDeadline: "2026-06-08T23:59:00-12:00",
-    submissionDeadline: "2026-06-15T23:59:00-12:00",
+    location: "Budapest, Hungary",
+    registrationDeadline: "2026-05-25T23:59:00-12:00",
+    submissionDeadline: "2026-05-25T23:59:00-12:00",
     timezone: "AoE",
     conferenceDates: "Nov 8 – Nov 12, 2026",
     website: "https://2026.emnlp.org/",
