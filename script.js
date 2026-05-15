@@ -13,6 +13,8 @@
   const modalRegistration = document.getElementById("modal-registration");
   const modalDates = document.getElementById("modal-dates");
   const modalWebsite = document.getElementById("modal-website");
+  const modalWarning = document.getElementById("modal-warning");
+  const modalWarningText = document.getElementById("modal-warning-text");
   const countdownEl = document.getElementById("countdown");
   const countdownTargetEl = document.getElementById("countdown-target");
   const cdDays = document.getElementById("cd-days");
@@ -51,6 +53,13 @@
   function isPassed(value) {
     const d = parseDate(value);
     return d && !isNaN(d) && d.getTime() < Date.now();
+  }
+
+  function estimateText(conf) {
+    return (
+      conf.estimatedNote ||
+      "Last year's dates — current-year deadlines not yet announced."
+    );
   }
 
   // Pick the next relevant deadline: registration if it hasn't passed,
@@ -157,9 +166,13 @@
     const tz = conf.timezone ? escapeHTML(conf.timezone) : "local";
     const regCls = isPassed(conf.registrationDeadline) ? "passed-date" : "";
     const subCls = isPassed(conf.submissionDeadline) ? "passed-date" : "";
+    const estimateBanner = conf.estimated
+      ? `<div class="estimate-banner small"><span class="estimate-icon">⚠</span>${escapeHTML(estimateText(conf))}</div>`
+      : "";
     card.innerHTML = `
       <h3 class="card-name">${escapeHTML(conf.name)}</h3>
       <div class="card-location">📍 ${escapeHTML(conf.location)}</div>
+      ${estimateBanner}
       <div class="card-row">
         <span>Registration</span>
         <span class="${regCls}">${formatShortDate(conf.registrationDeadline)}</span>
@@ -265,6 +278,13 @@
   function openModal(conf) {
     modalTitle.textContent = conf.name;
     modalLocation.textContent = `${conf.fullName ? conf.fullName + " — " : ""}${conf.location}`;
+
+    if (conf.estimated) {
+      modalWarningText.textContent = estimateText(conf);
+      modalWarning.hidden = false;
+    } else {
+      modalWarning.hidden = true;
+    }
     const tzSuffix = conf.timezone ? ` (${conf.timezone})` : "";
     modalSubmission.textContent = formatDate(conf.submissionDeadline) + tzSuffix;
     modalRegistration.textContent =

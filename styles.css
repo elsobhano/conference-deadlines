@@ -249,6 +249,36 @@ main {
   padding: 0.15rem 0.5rem;
 }
 
+.estimate-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: var(--warning);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin: 0.25rem 0 1rem;
+}
+
+.estimate-banner.small {
+  font-size: 0.78rem;
+  padding: 0.4rem 0.6rem;
+  margin: 0.1rem 0 0.25rem;
+}
+
+.estimate-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.estimate-banner.small .estimate-icon {
+  font-size: 0.85rem;
+}
+
 .empty-state {
   text-align: center;
   color: var(--muted);
