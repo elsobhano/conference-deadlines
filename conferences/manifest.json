@@ -1,0 +1,19 @@
+{
+  "_comment": "List of conference data files (relative to this folder). Order does not matter — the site sorts them. Each filename should be stable across years (e.g. 'neurips.json'). Bump the year/dates/stats inside the file each cycle.",
+  "conferences": [
+    "aaai.json",
+    "acl.json",
+    "acvr.json",
+    "bmvc.json",
+    "cvpr.json",
+    "emnlp.json",
+    "iclr.json",
+    "icml.json",
+    "ijcai.json",
+    "kdd.json",
+    "neurips.json",
+    "siggraph.json",
+    "wacv-round-1.json",
+    "wacv-round-2.json"
+  ]
+}

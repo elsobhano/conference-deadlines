@@ -15,6 +15,8 @@
   const modalWebsite = document.getElementById("modal-website");
   const modalWarning = document.getElementById("modal-warning");
   const modalWarningText = document.getElementById("modal-warning-text");
+  const modalStats = document.getElementById("modal-stats");
+  const modalStatsBody = document.getElementById("modal-stats-body");
   const countdownEl = document.getElementById("countdown");
   const countdownTargetEl = document.getElementById("countdown-target");
   const cdDays = document.getElementById("cd-days");
@@ -75,6 +77,31 @@
       conf.estimatedNote ||
       "Last year's dates — current-year deadlines not yet announced."
     );
+  }
+
+  function formatNumber(n) {
+    if (n == null || isNaN(n)) return "";
+    return new Intl.NumberFormat(undefined).format(n);
+  }
+
+  function latestStat(conf) {
+    if (!Array.isArray(conf.stats) || conf.stats.length === 0) return null;
+    return conf.stats
+      .slice()
+      .sort((a, b) => (b.year || 0) - (a.year || 0))[0];
+  }
+
+  function renderStatLine(stat) {
+    if (!stat) return "";
+    const parts = [];
+    if (stat.acceptanceRate != null)
+      parts.push(`${stat.acceptanceRate}% accepted`);
+    if (stat.submissions != null)
+      parts.push(`${formatNumber(stat.submissions)} submissions`);
+    if (parts.length === 0) return "";
+    return `<div class="card-stats">📊 ${parts.join(" · ")}${
+      stat.year ? ` <span class="stat-year">(${stat.year})</span>` : ""
+    }</div>`;
   }
 
   // Pick the next relevant deadline: registration if it hasn't passed,
@@ -219,6 +246,7 @@
         <span>Timezone</span>
         <span class="tz-pill">${tz}</span>
       </div>
+      ${renderStatLine(latestStat(conf))}
       ${badge ? `<span class="badge ${badge.cls}">${badge.label}</span>` : ""}
     `;
 
@@ -341,6 +369,25 @@
     );
     modalDates.textContent = conf.conferenceDates || "TBA";
 
+    const stats = Array.isArray(conf.stats) ? conf.stats.slice() : [];
+    if (stats.length > 0) {
+      stats.sort((a, b) => (b.year || 0) - (a.year || 0));
+      modalStatsBody.innerHTML = stats
+        .map(
+          (s) => `
+        <tr>
+          <td>${s.year ?? "–"}</td>
+          <td>${s.submissions != null ? formatNumber(s.submissions) : "–"}</td>
+          <td>${s.acceptanceRate != null ? s.acceptanceRate + "%" : "–"}</td>
+        </tr>
+      `
+        )
+        .join("");
+      modalStats.hidden = false;
+    } else {
+      modalStats.hidden = true;
+    }
+
     if (conf.website) {
       modalWebsite.href = conf.website;
       modalWebsite.textContent = conf.website;
@@ -404,5 +451,37 @@
     });
   });
 
-  render();
+  async function loadConferences() {
+    try {
+      const manifest = await fetch("conferences/manifest.json", {
+        cache: "no-cache",
+      }).then((r) => {
+        if (!r.ok) throw new Error("manifest " + r.status);
+        return r.json();
+      });
+      const files = manifest.conferences || [];
+      const results = await Promise.all(
+        files.map(async (f) => {
+          try {
+            const r = await fetch(`conferences/${f}`, { cache: "no-cache" });
+            if (!r.ok) throw new Error(`${f} ${r.status}`);
+            return await r.json();
+          } catch (err) {
+            console.warn(`Failed to load conferences/${f}:`, err);
+            return null;
+          }
+        })
+      );
+      window.CONFERENCES = results.filter(Boolean);
+    } catch (err) {
+      console.error("Failed to load conferences manifest:", err);
+      window.CONFERENCES = [];
+      emptyEl.textContent =
+        "Could not load conference data. Are you running this through a web server?";
+      emptyEl.hidden = false;
+    }
+    render();
+  }
+
+  loadConferences();
 })();
