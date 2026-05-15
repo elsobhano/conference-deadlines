@@ -8,5 +8,15 @@
   "conferenceDates": "Jul 19 – Jul 25, 2026",
   "website": "https://icml.cc/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2024, "submissions": 9473, "acceptanceRate": 27.5 },
+    { "year": 2023, "submissions": 6538, "acceptanceRate": 27.9 },
+    { "year": 2022, "submissions": 5630, "acceptanceRate": 21.9 },
+    { "year": 2021, "submissions": 5513, "acceptanceRate": 21.5 },
+    { "year": 2020, "submissions": 4990, "acceptanceRate": 21.8 },
+    { "year": 2019, "submissions": 3424, "acceptanceRate": 22.6 },
+    { "year": 2018, "submissions": 2473, "acceptanceRate": 25.1 },
+    { "year": 2017, "submissions": 1676, "acceptanceRate": 25.9 },
+    { "year": 2015, "submissions": 1037, "acceptanceRate": 26.0 }
+  ]
 }

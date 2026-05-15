@@ -8,5 +8,18 @@
   "conferenceDates": "Feb 16 – Feb 19, 2027",
   "website": "https://aaai.org/conference/aaai/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2025, "submissions": 12957, "acceptanceRate": 23.4 },
+    { "year": 2024, "submissions": 9862, "acceptanceRate": 23.75 },
+    { "year": 2023, "submissions": 8777, "acceptanceRate": 19.6 },
+    { "year": 2022, "submissions": 9020, "acceptanceRate": 15.0 },
+    { "year": 2021, "submissions": 7911, "acceptanceRate": 21.4 },
+    { "year": 2020, "submissions": 7737, "acceptanceRate": 20.6 },
+    { "year": 2019, "submissions": 7095, "acceptanceRate": 16.2 },
+    { "year": 2018, "submissions": 3800, "acceptanceRate": 24.6 },
+    { "year": 2017, "submissions": 2590, "acceptanceRate": 24.6 },
+    { "year": 2016, "submissions": 2132, "acceptanceRate": 25.8 },
+    { "year": 2015, "submissions": 1991, "acceptanceRate": 26.7 },
+    { "year": 2014, "submissions": 1406, "acceptanceRate": 28.0 }
+  ]
 }

@@ -8,5 +8,16 @@
   "conferenceDates": "Aug 15 – Aug 21, 2026",
   "website": "https://ijcai-26.org/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2023, "submissions": 4566, "acceptanceRate": 14.1 },
+    { "year": 2022, "submissions": 4535, "acceptanceRate": 14.9 },
+    { "year": 2021, "submissions": 4204, "acceptanceRate": 13.9 },
+    { "year": 2020, "submissions": 4717, "acceptanceRate": 12.6 },
+    { "year": 2019, "submissions": 4752, "acceptanceRate": 17.9 },
+    { "year": 2018, "submissions": 3470, "acceptanceRate": 20.5 },
+    { "year": 2017, "submissions": 2540, "acceptanceRate": 26.0 },
+    { "year": 2016, "submissions": 2294, "acceptanceRate": 24.0 },
+    { "year": 2015, "submissions": 1996, "acceptanceRate": 28.6 },
+    { "year": 2013, "submissions": 1473, "acceptanceRate": 28.0 }
+  ]
 }

@@ -9,5 +9,15 @@
   "website": "https://iclr.cc/",
   "estimated": true,
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2025, "submissions": 11672, "acceptanceRate": 31.75 },
+    { "year": 2024, "submissions": 7304, "acceptanceRate": 30.81 },
+    { "year": 2023, "submissions": 4956, "acceptanceRate": 32.0 },
+    { "year": 2022, "submissions": 3328, "acceptanceRate": 32.9 },
+    { "year": 2021, "submissions": 2997, "acceptanceRate": 28.7 },
+    { "year": 2020, "submissions": 2594, "acceptanceRate": 26.5 },
+    { "year": 2019, "submissions": 1591, "acceptanceRate": 31.4 },
+    { "year": 2018, "submissions": 981, "acceptanceRate": 32.0 },
+    { "year": 2017, "submissions": 507, "acceptanceRate": 39.1 }
+  ]
 }

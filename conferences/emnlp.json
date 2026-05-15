@@ -8,5 +8,16 @@
   "conferenceDates": "Nov 8 – Nov 12, 2026",
   "website": "https://2026.emnlp.org/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2023, "submissions": 3868, "acceptanceRate": 23.3 },
+    { "year": 2022, "submissions": 3242, "acceptanceRate": 22.1 },
+    { "year": 2021, "submissions": 2540, "acceptanceRate": 25.6 },
+    { "year": 2020, "submissions": 2455, "acceptanceRate": 24.5 },
+    { "year": 2019, "submissions": 1813, "acceptanceRate": 25.6 },
+    { "year": 2018, "submissions": 1376, "acceptanceRate": 25.5 },
+    { "year": 2017, "submissions": 836, "acceptanceRate": 25.8 },
+    { "year": 2016, "submissions": 687, "acceptanceRate": 25.8 },
+    { "year": 2015, "submissions": 600, "acceptanceRate": 26.2 },
+    { "year": 2014, "submissions": 510, "acceptanceRate": 30.4 }
+  ]
 }

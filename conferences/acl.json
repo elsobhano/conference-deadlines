@@ -8,5 +8,15 @@
   "conferenceDates": "Jul 26 – Aug 1, 2026",
   "website": "https://2026.aclweb.org/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2023, "submissions": 3872, "acceptanceRate": 23.5 },
+    { "year": 2021, "submissions": 2327, "acceptanceRate": 24.5 },
+    { "year": 2020, "submissions": 2244, "acceptanceRate": 25.4 },
+    { "year": 2019, "submissions": 1737, "acceptanceRate": 25.7 },
+    { "year": 2018, "submissions": 1018, "acceptanceRate": 25.3 },
+    { "year": 2017, "submissions": 751, "acceptanceRate": 25.0 },
+    { "year": 2016, "submissions": 825, "acceptanceRate": 28.0 },
+    { "year": 2015, "submissions": 692, "acceptanceRate": 25.0 },
+    { "year": 2014, "submissions": 572, "acceptanceRate": 26.2 }
+  ]
 }

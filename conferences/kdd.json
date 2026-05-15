@@ -8,5 +8,15 @@
   "conferenceDates": "Aug 22 – Aug 26, 2026",
   "website": "https://kdd2026.kdd.org/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2023, "submissions": 1416, "acceptanceRate": 22.1 },
+    { "year": 2022, "submissions": 1695, "acceptanceRate": 15.0 },
+    { "year": 2020, "submissions": 1279, "acceptanceRate": 16.9 },
+    { "year": 2019, "submissions": 1200, "acceptanceRate": 14.2 },
+    { "year": 2018, "submissions": 983, "acceptanceRate": 18.4 },
+    { "year": 2017, "submissions": 748, "acceptanceRate": 17.4 },
+    { "year": 2016, "submissions": 1115, "acceptanceRate": 13.7 },
+    { "year": 2015, "submissions": 819, "acceptanceRate": 19.5 },
+    { "year": 2014, "submissions": 1036, "acceptanceRate": 14.6 }
+  ]
 }

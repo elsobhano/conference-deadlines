@@ -8,5 +8,18 @@
   "conferenceDates": "Jun 14 – Jun 19, 2026",
   "website": "https://cvpr.thecvf.com/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2025, "submissions": 13008, "acceptanceRate": 22.1 },
+    { "year": 2024, "submissions": 11532, "acceptanceRate": 23.6 },
+    { "year": 2023, "submissions": 9155, "acceptanceRate": 25.8 },
+    { "year": 2022, "submissions": 8161, "acceptanceRate": 25.3 },
+    { "year": 2021, "submissions": 7015, "acceptanceRate": 23.7 },
+    { "year": 2020, "submissions": 6656, "acceptanceRate": 22.1 },
+    { "year": 2019, "submissions": 5160, "acceptanceRate": 25.0 },
+    { "year": 2018, "submissions": 3303, "acceptanceRate": 29.6 },
+    { "year": 2017, "submissions": 2620, "acceptanceRate": 29.9 },
+    { "year": 2016, "submissions": 2145, "acceptanceRate": 29.9 },
+    { "year": 2015, "submissions": 2123, "acceptanceRate": 28.3 },
+    { "year": 2014, "submissions": 1807, "acceptanceRate": 29.9 }
+  ]
 }

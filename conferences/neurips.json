@@ -8,5 +8,17 @@
   "conferenceDates": "Dec 7 – Dec 13, 2026",
   "website": "https://neurips.cc/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    { "year": 2025, "submissions": 21575, "acceptanceRate": 24.5 },
+    { "year": 2024, "submissions": 15671, "acceptanceRate": 25.8 },
+    { "year": 2023, "submissions": 12343, "acceptanceRate": 26.1 },
+    { "year": 2021, "submissions": 9122, "acceptanceRate": 25.7 },
+    { "year": 2020, "submissions": 9454, "acceptanceRate": 20.1 },
+    { "year": 2019, "submissions": 6743, "acceptanceRate": 21.1 },
+    { "year": 2018, "submissions": 4856, "acceptanceRate": 20.8 },
+    { "year": 2017, "submissions": 3240, "acceptanceRate": 20.9 },
+    { "year": 2016, "submissions": 2403, "acceptanceRate": 23.6 },
+    { "year": 2015, "submissions": 1838, "acceptanceRate": 21.9 },
+    { "year": 2014, "submissions": 1678, "acceptanceRate": 24.7 }
+  ]
 }
