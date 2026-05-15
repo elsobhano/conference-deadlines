@@ -8,5 +8,31 @@
   "conferenceDates": "Jan 7 – Jan 9, 2027",
   "website": "https://wacv.thecvf.com/",
   "type": "conference",
-  "stats": []
+  "stats": [
+    {
+      "year": 2026,
+      "submissions": 2450,
+      "acceptanceRate": 33.7
+    },
+    {
+      "year": 2025,
+      "submissions": 2458,
+      "acceptanceRate": 37.8
+    },
+    {
+      "year": 2024,
+      "submissions": 2043,
+      "acceptanceRate": 41.4
+    },
+    {
+      "year": 2023,
+      "submissions": 1577,
+      "acceptanceRate": 40.6
+    },
+    {
+      "year": 2022,
+      "submissions": 1200,
+      "acceptanceRate": 35
+    }
+  ]
 }
