@@ -16,6 +16,8 @@
     "neurips.json",
     "siggraph.json",
     "wacv-round-1.json",
-    "wacv-round-2.json"
+    "wacv-round-2.json",
+    "fg-round-1.json",
+    "fg-round-2.json"
   ]
 }

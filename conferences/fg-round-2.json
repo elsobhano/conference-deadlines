@@ -1,0 +1,33 @@
+{
+    "name": "FG (Round 2) 2026",
+    "fullName": "IEEE International Conference on Automatic Face and Gesture Recognition",
+    "location": "Kyoto, Japan",
+    "registrationDeadline": "2026-01-09T23:59:00",
+    "submissionDeadline": "2026-01-25T23:59:00",
+    "timezone": "AoE",
+    "conferenceDates": "May 25 – May 29, 2026",
+    "website": "https://fg2026.ieee-biometrics.org/",
+    "type": "conference",
+    "stats": [
+        {
+          "year": 2025,
+          "submissions": 251,
+          "acceptanceRate": 36.4
+        },
+        {
+          "year": 2024,
+          "submissions": 299,
+          "acceptanceRate": 39.4
+        },
+        {
+          "year": 2023,
+          "submissions": 85,
+          "acceptanceRate": 60
+        },
+        {
+          "year": 2021,
+          "submissions": 405,
+          "acceptanceRate": 35
+        }
+      ]
+  }
