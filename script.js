@@ -53,41 +53,123 @@
   let badgeTickerStarted = false;
   let activeFilter = "all";
 
+  // Offset of each timezone label in minutes east of UTC.
+  const TZ_OFFSETS_MIN = {
+    AOE: -12 * 60,
+    UTC: 0,
+    GMT: 0,
+    WET: 0,
+    WEST: 60,
+    BST: 60,
+    CET: 60,
+    CEST: 120,
+    EET: 120,
+    EEST: 180,
+    MSK: 180,
+    IST: 5.5 * 60,
+    PKT: 5 * 60,
+    SGT: 8 * 60,
+    HKT: 8 * 60,
+    CST: 8 * 60,
+    JST: 9 * 60,
+    KST: 9 * 60,
+    AEDT: 11 * 60,
+    AEST: 10 * 60,
+    NZDT: 13 * 60,
+    NZST: 12 * 60,
+    EST: -5 * 60,
+    EDT: -4 * 60,
+    CT: -6 * 60,
+    CDT: -5 * 60,
+    MST: -7 * 60,
+    MDT: -6 * 60,
+    PST: -8 * 60,
+    PDT: -7 * 60,
+    AKST: -9 * 60,
+    HST: -10 * 60,
+  };
+
+  function tzOffsetMin(label) {
+    if (!label) return null;
+    const key = String(label).toUpperCase().trim();
+    return key in TZ_OFFSETS_MIN ? TZ_OFFSETS_MIN[key] : null;
+  }
+
+  function parseIsoParts(value) {
+    if (!value) return null;
+    const m = String(value).match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(Z|[+-]\d{2}:?\d{2})?$/
+    );
+    if (!m) return null;
+    let offsetMin = null;
+    if (m[7]) {
+      if (m[7] === "Z") offsetMin = 0;
+      else {
+        const mm = m[7].match(/^([+-])(\d{2}):?(\d{2})$/);
+        if (mm) offsetMin = (mm[1] === "+" ? 1 : -1) * (+mm[2] * 60 + +mm[3]);
+      }
+    }
+    return {
+      y: +m[1],
+      mo: +m[2] - 1,
+      d: +m[3],
+      h: +m[4],
+      mi: +m[5],
+      s: +(m[6] || 0),
+      offsetMin,
+    };
+  }
+
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
     dateStyle: "long",
     timeStyle: "short",
   });
   const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
-  // Parse the wall-clock fields from the ISO string into a Date in the
-  // viewer's local timezone. Any offset in the string (`+02:00`, `Z`, etc.)
-  // and the conf's `timezone` label are ignored for math — they're treated as
-  // labels only. This keeps the countdown consistent with the displayed date:
-  // "May 22, 23:59" reads as May 22 in your local time, and the timer ticks
-  // down to that exact moment.
-  function parseDate(value, _timezone) {
-    if (!value) return null;
-    const m = String(value).match(
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
-    );
-    if (!m) {
+  // For DISPLAY: returns a Date whose UTC fields equal the wall-clock fields
+  // of the ISO string. Format with `timeZone: "UTC"` to render those numbers
+  // verbatim, regardless of the viewer's local timezone.
+  function wallClockDate(value) {
+    const p = parseIsoParts(value);
+    if (!p) {
+      if (!value) return null;
       const d = new Date(value);
       return isNaN(d) ? null : d;
     }
-    return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+    return new Date(Date.UTC(p.y, p.mo, p.d, p.h, p.mi, p.s));
+  }
+
+  // For MATH: returns the actual instant of the deadline. Uses the explicit
+  // offset in the ISO string if present, else derives it from the conf's
+  // `timezone` label, else falls back to the viewer's local time.
+  function parseDate(value, timezone) {
+    const p = parseIsoParts(value);
+    if (!p) {
+      if (!value) return null;
+      const d = new Date(value);
+      return isNaN(d) ? null : d;
+    }
+    let offsetMin = p.offsetMin;
+    if (offsetMin === null) offsetMin = tzOffsetMin(timezone);
+    if (offsetMin === null) {
+      return new Date(p.y, p.mo, p.d, p.h, p.mi, p.s);
+    }
+    return new Date(Date.UTC(p.y, p.mo, p.d, p.h, p.mi, p.s) - offsetMin * 60000);
   }
 
   function formatDate(value) {
-    const d = parseDate(value);
+    const d = wallClockDate(value);
     return d ? dateFormatter.format(d) : "TBA";
   }
 
   function formatShortDate(value) {
-    const d = parseDate(value);
+    const d = wallClockDate(value);
     return d ? shortDateFormatter.format(d) : "TBA";
   }
 
@@ -260,11 +342,11 @@
       ${estimateBanner}
       <div class="card-row">
         <span>Abstract</span>
-        <span class="${regCls}">${formatShortDate(conf.registrationDeadline)}</span>
+        <span class="${regCls}">${formatShortDate(conf.registrationDeadline)}${tz !== "local" ? ` <span class="date-tz">${tz}</span>` : ""}</span>
       </div>
       <div class="card-row">
         <span>Full Paper</span>
-        <span class="${subCls}">${formatShortDate(conf.submissionDeadline)}</span>
+        <span class="${subCls}">${formatShortDate(conf.submissionDeadline)}${tz !== "local" ? ` <span class="date-tz">${tz}</span>` : ""}</span>
       </div>
       <div class="card-row">
         <span>Timezone</span>
