@@ -498,6 +498,76 @@ main {
   margin: 0 0 1.5rem;
 }
 
+.countdown-target-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.08),
+    rgba(167, 139, 250, 0.08)
+  );
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+  text-align: center;
+}
+
+.countdown-target-panel[hidden] {
+  display: none;
+}
+
+.countdown-target-panel.passed {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: var(--border);
+}
+
+.cd-target-kind {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.cd-target-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.cd-target-date {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.cd-target-tz {
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--accent);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.countdown-target-panel.passed .cd-target-tz {
+  background: rgba(148, 163, 184, 0.18);
+  color: var(--muted);
+}
+
+.cd-target-local {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

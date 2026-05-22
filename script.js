@@ -47,6 +47,11 @@
   const cdHours = document.getElementById("cd-hours");
   const cdMinutes = document.getElementById("cd-minutes");
   const cdSeconds = document.getElementById("cd-seconds");
+  const cdTargetPanel = document.getElementById("cd-target-panel");
+  const cdTargetKind = document.getElementById("cd-target-kind");
+  const cdTargetDate = document.getElementById("cd-target-date");
+  const cdTargetTz = document.getElementById("cd-target-tz");
+  const cdTargetLocal = document.getElementById("cd-target-local");
 
   let countdownTimer = null;
   const liveBadges = [];
@@ -130,6 +135,23 @@
     month: "short",
     day: "numeric",
     year: "numeric",
+  });
+  const wallClockDateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const localDateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZoneName: "short",
   });
 
   // For DISPLAY: returns a Date whose UTC fields equal the wall-clock fields
@@ -223,11 +245,6 @@
     if (subValid) return { date: sub, kind: "submission" };
     if (regValid) return { date: reg, kind: "registration" };
     return null;
-  }
-
-  function kindLabel(kind, short) {
-    if (kind === "registration") return short ? "abstract" : "abstract submission";
-    return short ? "full paper" : "full paper submission";
   }
 
   function badgeFor(active) {
@@ -415,8 +432,9 @@
     startBadgeTicker();
   }
 
-  function updateCountdown(targetDate, kind, tz) {
+  function updateCountdown(conf, active) {
     const now = new Date();
+    const targetDate = active.date;
     let diff = targetDate.getTime() - now.getTime();
     const passed = diff < 0;
     if (passed) diff = -diff;
@@ -431,16 +449,39 @@
     cdMinutes.textContent = String(minutes).padStart(2, "0");
     cdSeconds.textContent = String(seconds).padStart(2, "0");
 
-    const label = kindLabel(kind, false);
-    const tzSuffix = tz ? ` (${tz})` : "";
-    countdownEl.classList.toggle("passed", passed);
-    countdownTargetEl.textContent = passed
-      ? `${capitalize(label)} deadline passed on ${dateFormatter.format(targetDate)}${tzSuffix}`
-      : `Time until ${label} deadline · ${dateFormatter.format(targetDate)}${tzSuffix}`;
-  }
+    // Target panel — deadline-tz wall-clock + viewer-local equivalent.
+    const rawValue =
+      active.kind === "registration"
+        ? conf.registrationDeadline
+        : conf.submissionDeadline;
+    const kindHeading =
+      active.kind === "registration"
+        ? "Abstract deadline"
+        : "Full paper deadline";
+    const wallDate = wallClockDate(rawValue);
+    cdTargetPanel.classList.toggle("passed", passed);
+    cdTargetKind.textContent = passed
+      ? `${kindHeading} · passed`
+      : kindHeading;
+    cdTargetDate.textContent = wallDate
+      ? wallClockDateTimeFormatter.format(wallDate)
+      : "";
+    cdTargetTz.textContent = conf.timezone || "local";
+    cdTargetTz.style.display = conf.timezone ? "" : "none";
 
-  function capitalize(s) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
+    const offsetMin = tzOffsetMin(conf.timezone);
+    // Only show local equivalent if the deadline tz differs from the viewer's.
+    if (offsetMin != null && offsetMin !== -now.getTimezoneOffset()) {
+      const localStr = localDateTimeFormatter.format(targetDate);
+      cdTargetLocal.textContent = `≈ ${localStr} in your local time`;
+      cdTargetLocal.style.display = "";
+    } else {
+      cdTargetLocal.textContent = "";
+      cdTargetLocal.style.display = "none";
+    }
+
+    countdownEl.classList.toggle("passed", passed);
+    countdownTargetEl.style.display = "none";
   }
 
   function stripYear(name) {
@@ -703,14 +744,14 @@
     }
     if (active) {
       countdownEl.hidden = false;
-      updateCountdown(active.date, active.kind, conf.timezone);
-      countdownTimer = setInterval(
-        () => updateCountdown(active.date, active.kind, conf.timezone),
-        1000
-      );
+      cdTargetPanel.hidden = false;
+      updateCountdown(conf, active);
+      countdownTimer = setInterval(() => updateCountdown(conf, active), 1000);
     } else {
       countdownEl.hidden = true;
       countdownEl.classList.remove("passed");
+      cdTargetPanel.hidden = true;
+      countdownTargetEl.style.display = "";
       countdownTargetEl.textContent = "Deadlines have not been announced yet.";
     }
 
