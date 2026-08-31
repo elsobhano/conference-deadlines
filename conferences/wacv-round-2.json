@@ -6,10 +6,9 @@
   "submissionDeadline": "2026-08-27T23:59:00",
   "timezone": "AoE",
   "conferenceDates": "Jan 7 – Jan 9, 2027",
-  "notificationDate": "2026-10-25",
+  "notificationDate": "2026-10-09",
   "notificationEstimated": true,
-  "reviewDate": "2026-09-27",
-  "reviewEstimated": true,
+  "reviewDate": null,
   "website": "https://wacv.thecvf.com/",
   "type": "conference",
   "stats": [
