@@ -639,6 +639,159 @@ main {
   text-decoration: underline;
 }
 
+/* Plan B — where to send a rejected paper next */
+.plan-b {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.plan-b[hidden] {
+  display: none;
+}
+
+.plan-b h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plan-b-intro {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.plan-b-intro strong {
+  color: var(--text);
+}
+
+.plan-b-flag {
+  display: inline-block;
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--warning);
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.estimated-value {
+  color: var(--warning);
+}
+
+.plan-b-group {
+  margin-bottom: 1.1rem;
+}
+
+.plan-b-group-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.plan-b-group-title.clear {
+  color: var(--success);
+}
+
+.plan-b-group-title.overlap {
+  color: var(--warning);
+}
+
+.plan-b-group-note {
+  margin: -0.25rem 0 0.6rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.plan-b-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plan-b-row {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.plan-b-row.is-passed {
+  opacity: 0.55;
+}
+
+.plan-b-group-title.overlap ~ .plan-b-list .plan-b-row {
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.plan-b-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.plan-b-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.plan-b-main .badge {
+  margin-top: 0;
+}
+
+.plan-b-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.plan-b-loc {
+  text-align: right;
+  opacity: 0.8;
+}
+
+.plan-b-sub {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.plan-b-sub.warn {
+  color: var(--warning);
+  opacity: 0.9;
+}
+
+.plan-b-more {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0.2rem 0.75rem;
+  font-style: italic;
+}
+
+.plan-b-empty {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
 .site-footer {
   text-align: center;
   color: var(--muted);

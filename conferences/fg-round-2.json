@@ -6,6 +6,8 @@
     "submissionDeadline": "2026-01-25T23:59:00",
     "timezone": "AoE",
     "conferenceDates": "May 25 – May 29, 2026",
+    "notificationDate": "2026-03-10",
+    "notificationEstimated": true,
     "website": "https://fg2026.ieee-biometrics.org/",
     "type": "conference",
     "stats": [

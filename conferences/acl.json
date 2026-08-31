@@ -6,6 +6,8 @@
   "submissionDeadline": "2026-02-15T23:59:00",
   "timezone": "AoE",
   "conferenceDates": "Jul 26 – Aug 1, 2026",
+  "notificationDate": "2026-05-15",
+  "notificationEstimated": true,
   "website": "https://2026.aclweb.org/",
   "type": "conference",
   "stats": [

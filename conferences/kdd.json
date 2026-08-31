@@ -6,6 +6,8 @@
   "submissionDeadline": "2026-02-10T23:59:00",
   "timezone": "AoE",
   "conferenceDates": "Aug 22 – Aug 26, 2026",
+  "notificationDate": "2026-05-15",
+  "notificationEstimated": true,
   "website": "https://kdd2026.kdd.org/",
   "type": "conference",
   "stats": [

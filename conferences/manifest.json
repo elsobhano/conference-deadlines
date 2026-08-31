@@ -1,5 +1,5 @@
 {
-  "_comment": "List of conference data files (relative to this folder). Order does not matter — the site sorts them. Each filename should be stable across years (e.g. 'neurips.json'). Bump the year/dates/stats inside the file each cycle.",
+  "_comment": "List of conference data files (relative to this folder). Order does not matter — the site sorts them. Each filename should be stable across years (e.g. 'neurips.json'). Bump the year/dates/stats inside the file each cycle. 'notificationDate' (YYYY-MM-DD) is when decisions land — it drives the 'if it gets rejected, where next?' planner; set 'notificationEstimated': false once the official date is announced.",
   "conferences": [
     "aaai.json",
     "acl.json",

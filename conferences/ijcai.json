@@ -6,6 +6,8 @@
   "submissionDeadline": "2026-01-17T23:59:00",
   "timezone": "AoE",
   "conferenceDates": "Aug 15 – Aug 21, 2026",
+  "notificationDate": "2026-04-25",
+  "notificationEstimated": true,
   "website": "https://ijcai-26.org/",
   "type": "conference",
   "stats": [

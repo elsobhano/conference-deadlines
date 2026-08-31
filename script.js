@@ -12,6 +12,10 @@
   const modalSubmission = document.getElementById("modal-submission");
   const modalRegistration = document.getElementById("modal-registration");
   const modalDates = document.getElementById("modal-dates");
+  const modalNotification = document.getElementById("modal-notification");
+  const planBEl = document.getElementById("modal-plan-b");
+  const planBIntro = document.getElementById("plan-b-intro");
+  const planBGroups = document.getElementById("plan-b-groups");
   const modalWebsite = document.getElementById("modal-website");
   const modalWarning = document.getElementById("modal-warning");
   const modalWarningText = document.getElementById("modal-warning-text");
@@ -102,8 +106,9 @@
 
   function parseIsoParts(value) {
     if (!value) return null;
+    // Time part is optional: notification dates are recorded as plain dates.
     const m = String(value).match(
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(Z|[+-]\d{2}:?\d{2})?$/
+      /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?(Z|[+-]\d{2}:?\d{2})?$/
     );
     if (!m) return null;
     let offsetMin = null;
@@ -118,8 +123,8 @@
       y: +m[1],
       mo: +m[2] - 1,
       d: +m[3],
-      h: +m[4],
-      mi: +m[5],
+      h: +(m[4] || 0),
+      mi: +(m[5] || 0),
       s: +(m[6] || 0),
       offsetMin,
     };
@@ -695,6 +700,188 @@
     }
   }
 
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  // "If this paper is rejected, where can it go next?"
+  //
+  // Anchor is this conference's decision-notification date. A venue is only a
+  // real fallback if its own deadlines still lie ahead of that moment —
+  // otherwise you would have to submit before you know the outcome here, which
+  // most venues forbid as a dual submission.
+  //
+  // Returns { notif, clear: [...], overlapping: [...] } or null when this
+  // conference has no notification date on file.
+  function buildPlanB(conf) {
+    const notif = parseDate(conf.notificationDate, conf.timezone);
+    if (!notif || isNaN(notif)) return null;
+
+    const now = Date.now();
+    const clear = [];
+    const overlapping = [];
+
+    for (const other of window.CONFERENCES || []) {
+      if (other === conf) continue;
+
+      const sub = parseDate(other.submissionDeadline, other.timezone);
+      const reg = parseDate(other.registrationDeadline, other.timezone);
+      if (!sub || isNaN(sub)) continue;
+
+      // A venue that closes before the decision lands is no fallback at all.
+      if (sub.getTime() < notif.getTime()) continue;
+
+      const regValid = reg && !isNaN(reg);
+      const gate = regValid ? reg : sub;
+      const entry = {
+        conf: other,
+        submission: sub,
+        registration: regValid ? reg : null,
+        // Days between hearing back here and the deadline you must hit there.
+        days: Math.floor((gate.getTime() - notif.getTime()) / DAY_MS),
+        daysToPaper: Math.floor((sub.getTime() - notif.getTime()) / DAY_MS),
+        // Still a valid fallback in the cycle's own timeline, but not something
+        // you can act on today.
+        passed: gate.getTime() < now,
+      };
+
+      // Abstract/registration closes while the paper is still under review:
+      // usable, but you must register there before the verdict arrives.
+      if (regValid && reg.getTime() < notif.getTime()) overlapping.push(entry);
+      else clear.push(entry);
+    }
+
+    // Actionable options first, each block by soonest deadline.
+    const byDeadline = (a, b) =>
+      a.passed !== b.passed
+        ? a.passed - b.passed
+        : a.submission.getTime() - b.submission.getTime();
+    clear.sort(byDeadline);
+    overlapping.sort(byDeadline);
+    return { notif, clear, overlapping };
+  }
+
+  function turnaroundLabel(days) {
+    if (days < 0) return "already open";
+    if (days === 0) return "same day";
+    if (days < 14) return `${days} ${days === 1 ? "day" : "days"} to rewrite`;
+    if (days < 60) {
+      const weeks = Math.round(days / 7);
+      return `~${weeks} ${weeks === 1 ? "week" : "weeks"} to rewrite`;
+    }
+    const months = Math.round(days / 30);
+    return `~${months} ${months === 1 ? "month" : "months"} to rewrite`;
+  }
+
+  function turnaroundClass(days) {
+    if (days < 14) return "urgent";
+    if (days < 45) return "soon";
+    return "upcoming";
+  }
+
+  function planBRow(entry) {
+    const c = entry.conf;
+    const tz = c.timezone ? ` <span class="date-tz">${escapeHTML(c.timezone)}</span>` : "";
+    const estimateFlag = c.estimated
+      ? ` <span class="plan-b-flag" title="${escapeHTML(estimateText(c))}">est.</span>`
+      : "";
+    const regNote =
+      entry.registration && entry.days !== entry.daysToPaper
+        ? `<div class="plan-b-sub${
+            entry.days < 0 ? " warn" : ""
+          }">Abstract due ${formatShortDate(
+            c.registrationDeadline
+          )}${
+            entry.days < 0
+              ? ` — ${-entry.days} ${
+                  entry.days === -1 ? "day" : "days"
+                } before you hear back`
+              : ""
+          }</div>`
+        : "";
+    // Turnaround is measured to the full-paper deadline — that is the work.
+    // The abstract deadline, when it lands earlier, is called out separately.
+    const badge = entry.passed
+      ? `<span class="badge passed">deadline gone by</span>`
+      : `<span class="badge ${turnaroundClass(
+          entry.daysToPaper
+        )}">${turnaroundLabel(entry.daysToPaper)}</span>`;
+    return `
+      <li class="plan-b-row${entry.passed ? " is-passed" : ""}">
+        <div class="plan-b-main">
+          <span class="plan-b-name">${escapeHTML(c.name)}${estimateFlag}</span>
+          ${badge}
+        </div>
+        <div class="plan-b-meta">
+          <span>Full paper ${formatShortDate(c.submissionDeadline)}${tz}</span>
+          <span class="plan-b-loc">${escapeHTML(c.location)}</span>
+        </div>
+        ${regNote}
+      </li>
+    `;
+  }
+
+  // Every still-open option is worth listing; historical ones are context, so
+  // only a handful are shown before collapsing into a count.
+  const MAX_PASSED_ROWS = 5;
+
+  function planBList(entries) {
+    const shown = [];
+    let hiddenPassed = 0;
+    for (const e of entries) {
+      if (e.passed && shown.filter((x) => x.passed).length >= MAX_PASSED_ROWS) {
+        hiddenPassed++;
+        continue;
+      }
+      shown.push(e);
+    }
+    const more = hiddenPassed
+      ? `<li class="plan-b-more">+ ${hiddenPassed} more whose deadline has already gone by</li>`
+      : "";
+    return `<ul class="plan-b-list">${shown.map(planBRow).join("")}${more}</ul>`;
+  }
+
+  function renderPlanB(conf) {
+    const plan = buildPlanB(conf);
+    if (!plan) {
+      planBEl.hidden = true;
+      return;
+    }
+
+    const estNote = conf.notificationEstimated
+      ? ' <span class="plan-b-flag">estimated</span>'
+      : "";
+    planBIntro.innerHTML =
+      `Decisions land around <strong>${formatShortDate(
+        conf.notificationDate
+      )}</strong>${estNote}. Every venue below has a deadline that falls after that, so a rejected paper could go there next — soonest first, ones whose deadline has already gone by are dimmed.`;
+
+    const sections = [];
+    if (plan.clear.length) {
+      sections.push(`
+        <div class="plan-b-group">
+          <h4 class="plan-b-group-title clear">✓ No overlap — every deadline is after you hear back</h4>
+          ${planBList(plan.clear)}
+        </div>
+      `);
+    }
+    if (plan.overlapping.length) {
+      sections.push(`
+        <div class="plan-b-group">
+          <h4 class="plan-b-group-title overlap">⚠ Overlaps your review — abstract closes before the verdict</h4>
+          <p class="plan-b-group-note">The full paper is due later, but you would have to register the abstract while this submission is still under review. Check the dual-submission policy first.</p>
+          ${planBList(plan.overlapping)}
+        </div>
+      `);
+    }
+    if (sections.length === 0) {
+      sections.push(
+        `<p class="plan-b-empty">No tracked venue has a deadline left after this decision date. Add more conferences to <code>conferences/</code>.</p>`
+      );
+    }
+
+    planBGroups.innerHTML = sections.join("");
+    planBEl.hidden = false;
+  }
+
   function openModal(conf) {
     const type = conf.type === "workshop" ? "workshop" : "conference";
     const typeLabel = type === "workshop" ? "Workshop" : "Conference";
@@ -726,7 +913,24 @@
       isPassed(conf.registrationDeadline, conf.timezone)
     );
     modalDates.textContent = conf.conferenceDates || "TBA";
+    if (conf.notificationDate) {
+      modalNotification.textContent =
+        formatShortDate(conf.notificationDate) +
+        (conf.notificationEstimated ? " (estimated)" : "");
+      modalNotification.classList.toggle(
+        "estimated-value",
+        !!conf.notificationEstimated
+      );
+      modalNotification.classList.toggle(
+        "passed-date",
+        isPassed(conf.notificationDate, conf.timezone)
+      );
+    } else {
+      modalNotification.textContent = "TBA";
+      modalNotification.classList.remove("estimated-value", "passed-date");
+    }
 
+    renderPlanB(conf);
     renderModalCharts(conf);
 
     if (conf.website) {

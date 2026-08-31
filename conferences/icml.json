@@ -6,6 +6,8 @@
   "submissionDeadline": "2026-01-30T23:59:00",
   "timezone": "AoE",
   "conferenceDates": "Jul 19 – Jul 25, 2026",
+  "notificationDate": "2026-05-01",
+  "notificationEstimated": true,
   "website": "https://icml.cc/",
   "type": "conference",
   "stats": [

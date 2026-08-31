@@ -6,6 +6,8 @@
     "submissionDeadline": "2025-03-07T23:59:00",
     "timezone": "AoE",
     "conferenceDates": "Oct 20 – Oct 24, 2025",
+    "notificationDate": "2025-06-26",
+    "notificationEstimated": true,
     "website": "https://iccv.thecvf.com/",
     "type": "conference",
     "stats": [

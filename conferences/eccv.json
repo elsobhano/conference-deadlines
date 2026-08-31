@@ -6,6 +6,8 @@
     "submissionDeadline": "2026-03-05T21:59:00",
     "timezone": "UTC",
     "conferenceDates": "Sep 8 – Sep 12, 2026",
+    "notificationDate": "2026-06-30",
+    "notificationEstimated": true,
     "website": "https://eccv.ecva.net/",
     "type": "conference",
     "stats": 

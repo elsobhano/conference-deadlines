@@ -6,6 +6,8 @@
   "submissionDeadline": "2026-07-28T23:59:00",
   "timezone": "AoE",
   "conferenceDates": "Feb 16 – Feb 19, 2027",
+  "notificationDate": "2026-11-10",
+  "notificationEstimated": true,
   "website": "https://aaai.org/conference/aaai/",
   "type": "conference",
   "stats": [
