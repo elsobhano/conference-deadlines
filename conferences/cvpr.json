@@ -8,6 +8,8 @@
   "conferenceDates": "Jun 14 – Jun 19, 2026",
   "notificationDate": "2026-02-25",
   "notificationEstimated": true,
+  "reviewDate": "2026-01-21",
+  "reviewEstimated": true,
   "website": "https://cvpr.thecvf.com/",
   "type": "conference",
   "stats": [

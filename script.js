@@ -13,6 +13,8 @@
   const modalRegistration = document.getElementById("modal-registration");
   const modalDates = document.getElementById("modal-dates");
   const modalNotification = document.getElementById("modal-notification");
+  const modalReview = document.getElementById("modal-review");
+  const modalReviewLabel = document.getElementById("modal-review-label");
   const planBEl = document.getElementById("modal-plan-b");
   const planBIntro = document.getElementById("plan-b-intro");
   const planBGroups = document.getElementById("plan-b-groups");
@@ -815,9 +817,15 @@
     // the last fallback deadline, with a little breathing room either side.
     const own = parseDate(conf.submissionDeadline, conf.timezone);
     const ownT = own && !isNaN(own) ? own.getTime() : notifT - 30 * DAY_MS;
+    const reviewStart = reviewInstant(conf);
     const lastT = entries[entries.length - 1].submission.getTime();
     const pad = Math.max((lastT - ownT) * 0.04, 3 * DAY_MS);
-    const t0 = Math.min(ownT, notifT) - pad;
+    const t0 =
+      Math.min(
+        ownT,
+        notifT,
+        reviewStart ? reviewStart.getTime() : Infinity
+      ) - pad;
     const t1 = lastT + pad;
     const span = t1 - t0 || 1;
     const pct = (t) => ((Math.min(Math.max(t, t0), t1) - t0) / span) * 100;
@@ -851,20 +859,55 @@
       conf.notificationDate
     )}"></div>`;
 
-    // Row 0: the paper currently under review at `conf`.
+    // Reviews, where the venue has them, are the early warning: you can start
+    // on a fallback from this date rather than waiting for the verdict.
+    const review = reviewInstant(conf);
+    const reviewT = review ? review.getTime() : null;
+    const reviewLine = review
+      ? `<div class="tl-line tl-review" style="left:${pct(reviewT).toFixed(
+          3
+        )}%" title="Reviews released: ${formatShortDate(conf.reviewDate)}${
+          conf.reviewEstimated ? " (estimated)" : ""
+        }"></div>`
+      : "";
+
+    // Row 0: the paper currently under review at `conf`. When reviews land
+    // before the verdict, the bar is split so the rebuttal window is visible.
+    const ownStart = pct(ownT);
+    const ownEnd = pct(notifT);
+    const ownBars = review
+      ? `<div class="tl-bar tl-bar-review" style="left:${ownStart.toFixed(
+          3
+        )}%;width:${Math.max(pct(reviewT) - ownStart, 0.5).toFixed(
+          3
+        )}%" title="Under review"></div>
+         <div class="tl-bar tl-bar-rebuttal" style="left:${pct(reviewT).toFixed(
+           3
+         )}%;width:${Math.max(ownEnd - pct(reviewT), 0.5).toFixed(
+          3
+        )}%" title="Reviews out → decision (rebuttal window)"></div>
+         <div class="tl-dot tl-dot-review" style="left:${pct(reviewT).toFixed(
+           3
+         )}%" title="Reviews released ${formatShortDate(conf.reviewDate)}"></div>`
+      : `<div class="tl-bar tl-bar-review" style="left:${ownStart.toFixed(
+          3
+        )}%;width:${Math.max(ownEnd - ownStart, 0.5).toFixed(
+          3
+        )}%" title="Under review"></div>`;
+    const ownDates = review
+      ? `reviews ${formatDayMonth(conf.reviewDate)} → decision ${formatDayMonth(
+          conf.notificationDate
+        )}`
+      : `under review → ${formatShortDate(conf.notificationDate)}${
+          conf.notificationEstimated ? " (est.)" : ""
+        }`;
     const ownRow = `
       <div class="tl-row tl-row-own">
         <div class="tl-label">
           <span class="tl-name">${escapeHTML(conf.name)}</span>
-          <span class="tl-dates">under review → ${formatShortDate(
-            conf.notificationDate
-          )}${conf.notificationEstimated ? " (est.)" : ""}</span>
+          <span class="tl-dates">${ownDates}</span>
         </div>
-        <div class="tl-track">
-          <div class="tl-bar tl-bar-review" style="left:${pct(ownT).toFixed(
-            3
-          )}%;width:${Math.max(pct(notifT) - pct(ownT), 0.5).toFixed(3)}%"></div>
-        </div>
+        <div class="tl-track">${ownBars}</div>
       </div>
     `;
 
@@ -931,6 +974,13 @@
 
     const clearCount = plan.clear.length;
     const openCount = entries.filter((e) => !e.passed).length;
+    const reviewNote = review
+      ? ` Reviews arrive around <strong>${formatShortDate(
+          conf.reviewDate
+        )}</strong>, ${Math.round(
+          (notifT - reviewT) / DAY_MS
+        )} days earlier — that is your first real signal.`
+      : "";
     timelineSummary.innerHTML = `Decisions land around <strong>${formatShortDate(
       conf.notificationDate
     )}</strong>${
@@ -938,7 +988,8 @@
         ? ' <span class="plan-b-flag">estimated</span>'
         : ""
     } — ${clearCount} venue${clearCount === 1 ? "" : "s"} clear of your review,
-      ${plan.overlapping.length} overlapping it, ${openCount} still open today.`;
+      ${plan.overlapping.length} overlapping it, ${openCount} still open
+      today.${reviewNote}`;
 
     timelineChart.innerHTML = `
       <div class="tl-axis">
@@ -946,7 +997,7 @@
         <div class="tl-track">${ticks}</div>
       </div>
       <div class="tl-body">
-        <div class="tl-overlay">${gridlines}${decisionLine}${todayLine}</div>
+        <div class="tl-overlay">${gridlines}${reviewLine}${decisionLine}${todayLine}</div>
         ${ownRow}
         ${rows}
       </div>
@@ -991,6 +1042,18 @@
   }
 
   const DAY_MS = 24 * 60 * 60 * 1000;
+
+  // Some venues release reviews (opening a rebuttal window) before the final
+  // verdict. The field is optional and may be null — treat anything that is
+  // missing, unparseable, or not strictly before the notification as absent.
+  function reviewInstant(conf) {
+    if (!conf || !conf.reviewDate) return null;
+    const r = parseDate(conf.reviewDate, conf.timezone);
+    if (!r || isNaN(r)) return null;
+    const n = parseDate(conf.notificationDate, conf.timezone);
+    if (n && !isNaN(n) && r.getTime() >= n.getTime()) return null;
+    return r;
+  }
 
   // "If this paper is rejected, where can it go next?"
   //
@@ -1139,10 +1202,22 @@
     const estNote = conf.notificationEstimated
       ? ' <span class="plan-b-flag">estimated</span>'
       : "";
+    const review = reviewInstant(conf);
+    const reviewLead = review
+      ? ` Reviews land earlier, around <strong>${formatShortDate(
+          conf.reviewDate
+        )}</strong>${
+          conf.reviewEstimated
+            ? ' <span class="plan-b-flag">estimated</span>'
+            : ""
+        }, so you get ${Math.round(
+          (plan.notif.getTime() - review.getTime()) / DAY_MS
+        )} days of warning before the verdict.`
+      : "";
     planBIntro.innerHTML =
       `Decisions land around <strong>${formatShortDate(
         conf.notificationDate
-      )}</strong>${estNote}. Every venue below has a deadline that falls after that, so a rejected paper could go there next — soonest first, ones whose deadline has already gone by are dimmed.`;
+      )}</strong>${estNote}. Every venue below has a deadline that falls after that, so a rejected paper could go there next — soonest first, ones whose deadline has already gone by are dimmed.${reviewLead}`;
 
     const sections = [];
     if (plan.clear.length) {
@@ -1203,6 +1278,28 @@
       isPassed(conf.registrationDeadline, conf.timezone)
     );
     modalDates.textContent = conf.conferenceDates || "TBA";
+
+    // The reviews row only exists for venues that have an author-response
+    // phase, so hide the whole pair rather than showing an empty value.
+    const review = reviewInstant(conf);
+    if (review) {
+      modalReview.textContent =
+        formatShortDate(conf.reviewDate) +
+        (conf.reviewEstimated ? " (estimated)" : "");
+      modalReview.classList.toggle("estimated-value", !!conf.reviewEstimated);
+      modalReview.classList.toggle(
+        "passed-date",
+        review.getTime() < Date.now()
+      );
+      modalReview.style.display = "";
+      modalReviewLabel.style.display = "";
+    } else {
+      modalReview.textContent = "";
+      modalReview.classList.remove("estimated-value", "passed-date");
+      modalReview.style.display = "none";
+      modalReviewLabel.style.display = "none";
+    }
+
     if (conf.notificationDate) {
       modalNotification.textContent =
         formatShortDate(conf.notificationDate) +

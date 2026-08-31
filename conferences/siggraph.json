@@ -8,6 +8,8 @@
   "conferenceDates": "Aug 9 – Aug 13, 2026",
   "notificationDate": "2026-04-03",
   "notificationEstimated": true,
+  "reviewDate": "2026-02-27",
+  "reviewEstimated": true,
   "website": "https://s2026.siggraph.org/",
   "type": "conference",
   "stats": []

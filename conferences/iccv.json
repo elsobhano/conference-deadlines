@@ -8,6 +8,8 @@
     "conferenceDates": "Oct 20 – Oct 24, 2025",
     "notificationDate": "2025-06-26",
     "notificationEstimated": true,
+    "reviewDate": "2025-04-27",
+    "reviewEstimated": true,
     "website": "https://iccv.thecvf.com/",
     "type": "conference",
     "stats": [

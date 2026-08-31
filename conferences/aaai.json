@@ -8,6 +8,8 @@
   "conferenceDates": "Feb 16 – Feb 19, 2027",
   "notificationDate": "2026-11-10",
   "notificationEstimated": true,
+  "reviewDate": "2026-10-06",
+  "reviewEstimated": true,
   "website": "https://aaai.org/conference/aaai/",
   "type": "conference",
   "stats": [

@@ -8,6 +8,8 @@
   "conferenceDates": "Apr 26 – Apr 30, 2027",
   "notificationDate": "2027-01-22",
   "notificationEstimated": true,
+  "reviewDate": "2026-11-11",
+  "reviewEstimated": true,
   "website": "https://iclr.cc/",
   "type": "conference",
   "stats": [

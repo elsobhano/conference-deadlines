@@ -8,6 +8,7 @@
     "conferenceDates": "April 26 – April 30, 2027",
     "notificationDate": "2027-01-15",
     "notificationEstimated": true,
+    "reviewDate": null,
     "website": "https://fg2027.ieee-biometrics.org/",
     "type": "conference",
     "stats": []

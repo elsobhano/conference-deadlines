@@ -8,6 +8,8 @@
   "conferenceDates": "Aug 15 – Aug 21, 2026",
   "notificationDate": "2026-04-25",
   "notificationEstimated": true,
+  "reviewDate": "2026-03-21",
+  "reviewEstimated": true,
   "website": "https://ijcai-26.org/",
   "type": "conference",
   "stats": [

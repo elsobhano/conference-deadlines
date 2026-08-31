@@ -8,6 +8,8 @@
     "conferenceDates": "Sep 8 – Sep 12, 2026",
     "notificationDate": "2026-06-30",
     "notificationEstimated": true,
+    "reviewDate": "2026-05-01",
+    "reviewEstimated": true,
     "website": "https://eccv.ecva.net/",
     "type": "conference",
     "stats": 

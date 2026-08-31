@@ -8,6 +8,8 @@
   "conferenceDates": "Nov 8 – Nov 12, 2026",
   "notificationDate": "2026-08-20",
   "notificationEstimated": true,
+  "reviewDate": "2026-07-21",
+  "reviewEstimated": true,
   "website": "https://2026.emnlp.org/",
   "type": "conference",
   "stats": [

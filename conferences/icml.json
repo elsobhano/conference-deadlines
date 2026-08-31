@@ -8,6 +8,8 @@
   "conferenceDates": "Jul 19 – Jul 25, 2026",
   "notificationDate": "2026-05-01",
   "notificationEstimated": true,
+  "reviewDate": "2026-03-25",
+  "reviewEstimated": true,
   "website": "https://icml.cc/",
   "type": "conference",
   "stats": [

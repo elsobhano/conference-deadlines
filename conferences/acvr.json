@@ -8,6 +8,7 @@
   "conferenceDates": "8-9th September 2026",
   "notificationDate": "2026-07-25",
   "notificationEstimated": true,
+  "reviewDate": null,
   "website": "https://iplab.dmi.unict.it/acvr2026/index.html",
   "type": "workshop",
   "parentConference": "ECCV 2026",

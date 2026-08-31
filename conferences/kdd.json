@@ -8,6 +8,8 @@
   "conferenceDates": "Aug 22 – Aug 26, 2026",
   "notificationDate": "2026-05-15",
   "notificationEstimated": true,
+  "reviewDate": "2026-04-15",
+  "reviewEstimated": true,
   "website": "https://kdd2026.kdd.org/",
   "type": "conference",
   "stats": [

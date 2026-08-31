@@ -775,6 +775,11 @@ main {
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
+.tl-line.tl-review {
+  border-left: 2px dashed #a78bfa;
+  opacity: 0.8;
+}
+
 .tl-line.tl-today {
   border-left: 1px dashed var(--warning);
   opacity: 0.75;
@@ -858,6 +863,18 @@ main {
   border-color: rgba(167, 139, 250, 0.7);
 }
 
+/* Rebuttal window: reviews are out, the verdict is not in yet. */
+.tl-bar-rebuttal {
+  background: rgba(167, 139, 250, 0.18);
+  border: 1px dashed rgba(167, 139, 250, 0.7);
+}
+
+.tl-dot-review {
+  background: #a78bfa;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px #a78bfa;
+}
+
 .tl-row-own {
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.45rem;
@@ -917,6 +934,12 @@ main {
   width: 3px;
   height: 14px;
   background: var(--accent);
+}
+
+.tl-key-review {
+  width: 0;
+  height: 14px;
+  border-left: 2px dashed #a78bfa;
 }
 
 .tl-key-today {

@@ -8,6 +8,8 @@
   "conferenceDates": "Jan 7 – Jan 9, 2027",
   "notificationDate": "2026-10-25",
   "notificationEstimated": true,
+  "reviewDate": "2026-09-27",
+  "reviewEstimated": true,
   "website": "https://wacv.thecvf.com/",
   "type": "conference",
   "stats": [
