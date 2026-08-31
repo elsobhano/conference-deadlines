@@ -29,6 +29,7 @@
       <button class="filter-tab" data-filter="conference" role="tab" aria-selected="false">Conferences</button>
       <button class="filter-tab" data-filter="workshop" role="tab" aria-selected="false">Workshops</button>
       <button id="compare-btn" class="compare-btn">📊 Compare all</button>
+      <button id="timeline-btn" class="compare-btn timeline-btn">🗓 Plan B timeline</button>
     </div>
   </header>
 
@@ -137,6 +138,42 @@
         <h4>Submissions</h4>
         <div class="chart-wrap tall"><canvas id="compare-chart-subs"></canvas></div>
       </div>
+    </div>
+  </div>
+
+  <div
+    id="timeline-modal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="timeline-title"
+    hidden
+  >
+    <div class="modal-content timeline-content">
+      <button class="modal-close" id="timeline-close" aria-label="Close">&times;</button>
+      <h2 id="timeline-title">Plan B timeline</h2>
+      <p class="modal-location">
+        Pick the venue you submitted to. Everything to the right of the decision
+        line is a paper you could still write; anything crossing it overlaps
+        your review.
+      </p>
+
+      <div class="tl-controls">
+        <label for="timeline-select">I submitted to</label>
+        <select id="timeline-select" aria-label="Conference you submitted to"></select>
+      </div>
+
+      <p class="tl-summary" id="timeline-summary"></p>
+      <div class="tl-scroll">
+        <div class="tl-chart" id="timeline-chart"></div>
+      </div>
+
+      <ul class="tl-legend">
+        <li><span class="tl-key tl-key-decision"></span> Your decision date</li>
+        <li><span class="tl-key tl-key-today"></span> Today</li>
+        <li><span class="tl-key tl-key-abstract"></span> Abstract deadline</li>
+        <li><span class="tl-key tl-key-paper"></span> Full paper deadline</li>
+      </ul>
     </div>
   </div>
 

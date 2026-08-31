@@ -639,6 +639,303 @@ main {
   text-decoration: underline;
 }
 
+/* Plan B timeline — Gantt view of fallback deadlines vs. your decision date */
+.timeline-btn {
+  background: rgba(74, 222, 128, 0.15);
+  border-color: rgba(74, 222, 128, 0.4);
+  color: var(--success);
+}
+
+.timeline-btn:hover {
+  background: rgba(74, 222, 128, 0.28);
+  border-color: var(--success);
+}
+
+.timeline-content {
+  max-width: 980px;
+}
+
+.tl-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.tl-controls label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+#timeline-select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  flex: 1;
+  min-width: 200px;
+}
+
+#timeline-select:focus {
+  border-color: var(--accent);
+}
+
+.tl-summary {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0 0 0.9rem;
+}
+
+.tl-summary strong {
+  color: var(--text);
+}
+
+.tl-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tl-chart {
+  --tl-label-w: 205px;
+  min-width: 620px;
+}
+
+.tl-axis,
+.tl-row {
+  display: grid;
+  grid-template-columns: var(--tl-label-w) 1fr;
+  gap: 0 0.75rem;
+  align-items: center;
+}
+
+.tl-axis {
+  height: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.tl-axis .tl-track {
+  position: relative;
+  height: 100%;
+}
+
+.tl-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  font-size: 0.68rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tl-tick span {
+  position: absolute;
+  left: 0;
+  transform: translateX(-50%);
+}
+
+.tl-body {
+  position: relative;
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 0;
+}
+
+.tl-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--tl-label-w) + 0.75rem);
+  right: 0;
+  pointer-events: none;
+}
+
+.tl-gridline,
+.tl-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+}
+
+.tl-gridline {
+  border-left: 1px dashed rgba(148, 163, 184, 0.15);
+}
+
+.tl-line.tl-decision {
+  border-left: 2px solid var(--accent);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+.tl-line.tl-today {
+  border-left: 1px dashed var(--warning);
+  opacity: 0.75;
+}
+
+.tl-row {
+  min-height: 2.6rem;
+  padding: 0.15rem 0;
+}
+
+.tl-row-passed {
+  opacity: 0.45;
+}
+
+.tl-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  overflow: hidden;
+}
+
+.tl-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-gap {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.tl-row-overlap .tl-gap {
+  color: var(--warning);
+}
+
+.tl-row-clear .tl-gap {
+  color: var(--success);
+}
+
+.tl-dates {
+  font-size: 0.68rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-track {
+  position: relative;
+  height: 1.5rem;
+}
+
+.tl-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.35);
+  border: 1px solid rgba(74, 222, 128, 0.6);
+  min-width: 4px;
+}
+
+.tl-row-overlap .tl-bar {
+  background: rgba(251, 191, 36, 0.35);
+  border-color: rgba(251, 191, 36, 0.65);
+}
+
+.tl-bar-review {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(167, 139, 250, 0.5),
+    rgba(167, 139, 250, 0.5) 5px,
+    rgba(167, 139, 250, 0.2) 5px,
+    rgba(167, 139, 250, 0.2) 10px
+  );
+  border-color: rgba(167, 139, 250, 0.7);
+}
+
+.tl-row-own {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.tl-row-own .tl-name {
+  color: #a78bfa;
+}
+
+.tl-dot {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tl-dot-paper {
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.tl-dot-abstract {
+  background: var(--bg);
+  border: 2px solid var(--muted);
+}
+
+.tl-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.tl-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tl-key {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.tl-key-decision {
+  width: 3px;
+  height: 14px;
+  background: var(--accent);
+}
+
+.tl-key-today {
+  width: 3px;
+  height: 14px;
+  background: var(--warning);
+}
+
+.tl-key-abstract {
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--muted);
+}
+
+.tl-key-paper {
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 /* Plan B — where to send a rejected paper next */
 .plan-b {
   margin-top: 1.5rem;

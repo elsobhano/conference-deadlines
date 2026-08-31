@@ -23,6 +23,12 @@
   const compareModal = document.getElementById("compare-modal");
   const compareBtn = document.getElementById("compare-btn");
   const compareClose = document.getElementById("compare-close");
+  const timelineModal = document.getElementById("timeline-modal");
+  const timelineBtn = document.getElementById("timeline-btn");
+  const timelineClose = document.getElementById("timeline-close");
+  const timelineSelect = document.getElementById("timeline-select");
+  const timelineChart = document.getElementById("timeline-chart");
+  const timelineSummary = document.getElementById("timeline-summary");
 
   let chartRate = null;
   let chartSubs = null;
@@ -681,6 +687,290 @@
     );
   }
 
+  // ---- Plan B timeline -----------------------------------------------------
+
+  const monthFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
+    month: "short",
+  });
+  const monthYearFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
+    month: "short",
+    year: "numeric",
+  });
+  // Row labels are tight on space and the axis already carries the year.
+  const dayMonthFormatter = new Intl.DateTimeFormat(undefined, {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
+  });
+
+  function formatDayMonth(value) {
+    const d = wallClockDate(value);
+    return d ? dayMonthFormatter.format(d) : "TBA";
+  }
+
+  // Month gridlines across [t0, t1], thinned out so a long span stays legible.
+  function monthTicks(t0, t1) {
+    const spanDays = (t1 - t0) / DAY_MS;
+    const step = spanDays > 550 ? 3 : spanDays > 300 ? 2 : 1;
+    const start = new Date(t0);
+    let y = start.getUTCFullYear();
+    let m = start.getUTCMonth() + 1;
+    const ticks = [];
+    for (let guard = 0; guard < 200; guard++) {
+      const t = Date.UTC(y, m, 1);
+      if (t >= t1) break;
+      ticks.push(t);
+      m += step;
+      while (m > 11) {
+        m -= 12;
+        y += 1;
+      }
+    }
+    return ticks;
+  }
+
+  function tickLabel(t) {
+    const d = new Date(t);
+    return d.getUTCMonth() === 0
+      ? monthYearFormatter.format(d)
+      : monthFormatter.format(d);
+  }
+
+  // Which conference is the user most likely waiting on? The one whose paper
+  // deadline has passed but whose decision has not landed yet.
+  function defaultTimelineConf(list) {
+    const now = Date.now();
+    const waiting = list
+      .filter((c) => {
+        const sub = parseDate(c.submissionDeadline, c.timezone);
+        const notif = parseDate(c.notificationDate, c.timezone);
+        return (
+          sub && !isNaN(sub) && sub.getTime() <= now &&
+          notif && !isNaN(notif) && notif.getTime() >= now
+        );
+      })
+      .sort(
+        (a, b) =>
+          parseDate(a.notificationDate, a.timezone) -
+          parseDate(b.notificationDate, b.timezone)
+      );
+    if (waiting.length) return waiting[0];
+    // Otherwise the next deadline coming up.
+    const upcoming = sortConferences(list, "submission")[0];
+    return upcoming || list[0] || null;
+  }
+
+  function populateTimelineSelect() {
+    const list = (window.CONFERENCES || [])
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+    timelineSelect.innerHTML = list
+      .map(
+        (c, i) =>
+          `<option value="${i}">${escapeHTML(c.name)}${
+            c.notificationDate ? "" : " — no decision date"
+          }</option>`
+      )
+      .join("");
+    timelineSelect._list = list;
+    const preferred = defaultTimelineConf(list);
+    const idx = preferred ? list.indexOf(preferred) : -1;
+    if (idx >= 0) timelineSelect.value = String(idx);
+  }
+
+  function renderTimeline(conf) {
+    if (!conf) {
+      timelineChart.innerHTML = "";
+      timelineSummary.textContent = "No conference data loaded.";
+      return;
+    }
+
+    const plan = buildPlanB(conf);
+    if (!plan) {
+      timelineChart.innerHTML = "";
+      timelineSummary.innerHTML = `<strong>${escapeHTML(
+        conf.name
+      )}</strong> has no decision-notification date on file, so there is nothing to anchor a timeline to. Add <code>notificationDate</code> to its file in <code>conferences/</code>.`;
+      return;
+    }
+
+    const notifT = plan.notif.getTime();
+    const entries = plan.clear
+      .concat(plan.overlapping)
+      .sort((a, b) => a.submission.getTime() - b.submission.getTime());
+
+    if (entries.length === 0) {
+      timelineChart.innerHTML = "";
+      timelineSummary.innerHTML = `Decisions for <strong>${escapeHTML(
+        conf.name
+      )}</strong> land around <strong>${formatShortDate(
+        conf.notificationDate
+      )}</strong>, but no tracked venue has a deadline after that. Add later-cycle conferences to see fallbacks here.`;
+      return;
+    }
+
+    // Span the chart from this submission (or a month before the verdict) to
+    // the last fallback deadline, with a little breathing room either side.
+    const own = parseDate(conf.submissionDeadline, conf.timezone);
+    const ownT = own && !isNaN(own) ? own.getTime() : notifT - 30 * DAY_MS;
+    const lastT = entries[entries.length - 1].submission.getTime();
+    const pad = Math.max((lastT - ownT) * 0.04, 3 * DAY_MS);
+    const t0 = Math.min(ownT, notifT) - pad;
+    const t1 = lastT + pad;
+    const span = t1 - t0 || 1;
+    const pct = (t) => ((Math.min(Math.max(t, t0), t1) - t0) / span) * 100;
+
+    // Drop ticks hugging the right edge — their label would be clipped.
+    const tickTimes = monthTicks(t0, t1).filter((t) => pct(t) <= 96);
+    const ticks = tickTimes
+      .map(
+        (t) =>
+          `<div class="tl-tick" style="left:${pct(t).toFixed(
+            3
+          )}%"><span>${tickLabel(t)}</span></div>`
+      )
+      .join("");
+    const gridlines = tickTimes
+      .map(
+        (t) => `<div class="tl-gridline" style="left:${pct(t).toFixed(3)}%"></div>`
+      )
+      .join("");
+
+    const now = Date.now();
+    const todayLine =
+      now > t0 && now < t1
+        ? `<div class="tl-line tl-today" style="left:${pct(now).toFixed(
+            3
+          )}%" title="Today"></div>`
+        : "";
+    const decisionLine = `<div class="tl-line tl-decision" style="left:${pct(
+      notifT
+    ).toFixed(3)}%" title="Decision: ${formatShortDate(
+      conf.notificationDate
+    )}"></div>`;
+
+    // Row 0: the paper currently under review at `conf`.
+    const ownRow = `
+      <div class="tl-row tl-row-own">
+        <div class="tl-label">
+          <span class="tl-name">${escapeHTML(conf.name)}</span>
+          <span class="tl-dates">under review → ${formatShortDate(
+            conf.notificationDate
+          )}${conf.notificationEstimated ? " (est.)" : ""}</span>
+        </div>
+        <div class="tl-track">
+          <div class="tl-bar tl-bar-review" style="left:${pct(ownT).toFixed(
+            3
+          )}%;width:${Math.max(pct(notifT) - pct(ownT), 0.5).toFixed(3)}%"></div>
+        </div>
+      </div>
+    `;
+
+    const rows = entries
+      .map((e) => {
+        const c = e.conf;
+        const overlaps = e.days < 0;
+        const subT = e.submission.getTime();
+        const regT = e.registration ? e.registration.getTime() : subT;
+        const left = pct(Math.min(regT, subT));
+        const width = Math.max(pct(subT) - left, 0.6);
+        const cls = [
+          "tl-row",
+          overlaps ? "tl-row-overlap" : "tl-row-clear",
+          e.passed ? "tl-row-passed" : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        const regDot =
+          e.registration && regT !== subT
+            ? `<div class="tl-dot tl-dot-abstract" style="left:${pct(
+                regT
+              ).toFixed(3)}%" title="Abstract due ${formatShortDate(
+                c.registrationDeadline
+              )}"></div>`
+            : "";
+        const dates = e.registration
+          ? `abstract ${formatDayMonth(
+              c.registrationDeadline
+            )} · paper ${formatDayMonth(c.submissionDeadline)}`
+          : `paper ${formatDayMonth(c.submissionDeadline)}`;
+        const gap = overlaps
+          ? `<span class="tl-gap" title="Abstract closes ${-e.days} day${
+              e.days === -1 ? "" : "s"
+            } before your verdict">${-e.days}d early</span>`
+          : `<span class="tl-gap" title="${
+              e.daysToPaper
+            } days between the verdict and this paper deadline">+${
+              e.daysToPaper
+            }d</span>`;
+        return `
+          <div class="${cls}">
+            <div class="tl-label">
+              <span class="tl-name">${escapeHTML(c.name)} ${gap}</span>
+              <span class="tl-dates">${dates}</span>
+            </div>
+            <div class="tl-track">
+              <div class="tl-bar" style="left:${left.toFixed(
+                3
+              )}%;width:${width.toFixed(3)}%" title="${escapeHTML(
+                c.name
+              )}: submission window"></div>
+              ${regDot}
+              <div class="tl-dot tl-dot-paper" style="left:${pct(subT).toFixed(
+                3
+              )}%" title="Full paper due ${formatShortDate(
+                c.submissionDeadline
+              )}"></div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    const clearCount = plan.clear.length;
+    const openCount = entries.filter((e) => !e.passed).length;
+    timelineSummary.innerHTML = `Decisions land around <strong>${formatShortDate(
+      conf.notificationDate
+    )}</strong>${
+      conf.notificationEstimated
+        ? ' <span class="plan-b-flag">estimated</span>'
+        : ""
+    } — ${clearCount} venue${clearCount === 1 ? "" : "s"} clear of your review,
+      ${plan.overlapping.length} overlapping it, ${openCount} still open today.`;
+
+    timelineChart.innerHTML = `
+      <div class="tl-axis">
+        <div class="tl-label"></div>
+        <div class="tl-track">${ticks}</div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-overlay">${gridlines}${decisionLine}${todayLine}</div>
+        ${ownRow}
+        ${rows}
+      </div>
+    `;
+  }
+
+  function currentTimelineConf() {
+    const list = timelineSelect._list || window.CONFERENCES || [];
+    return list[+timelineSelect.value] || null;
+  }
+
+  function openTimelineModal() {
+    timelineModal.hidden = false;
+    document.body.style.overflow = "hidden";
+    populateTimelineSelect();
+    renderTimeline(currentTimelineConf());
+    timelineClose.focus();
+  }
+
+  function closeTimelineModal() {
+    timelineModal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
   function openCompareModal() {
     compareModal.hidden = false;
     document.body.style.overflow = "hidden";
@@ -990,9 +1280,18 @@
   compareModal.addEventListener("click", (e) => {
     if (e.target === compareModal) closeCompareModal();
   });
+  timelineBtn.addEventListener("click", openTimelineModal);
+  timelineClose.addEventListener("click", closeTimelineModal);
+  timelineModal.addEventListener("click", (e) => {
+    if (e.target === timelineModal) closeTimelineModal();
+  });
+  timelineSelect.addEventListener("change", () =>
+    renderTimeline(currentTimelineConf())
+  );
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (!compareModal.hidden) closeCompareModal();
+    if (!timelineModal.hidden) closeTimelineModal();
+    else if (!compareModal.hidden) closeCompareModal();
     else if (!modal.hidden) closeModal();
   });
 
